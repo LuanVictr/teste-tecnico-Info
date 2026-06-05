@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
+import { AppCacheModule } from './shared/cache/cache.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         },
       }),
     }),
+    AppCacheModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

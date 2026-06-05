@@ -1,0 +1,97 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-06-05T00:00:00.000Z",
+  "__export_source": "aivacol-fleet-management",
+  "resources": [
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "access_token": ""
+      },
+      "parentId": "wrk_fleet"
+    },
+    {
+      "_id": "env_local",
+      "_type": "environment",
+      "name": "Local",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "access_token": ""
+      },
+      "parentId": "wrk_fleet",
+      "isPrivate": false
+    },
+    {
+      "_id": "env_vps",
+      "_type": "environment",
+      "name": "VPS (Produção)",
+      "data": {
+        "base_url": "http://SEU_IP_VPS:3000",
+        "access_token": ""
+      },
+      "parentId": "wrk_fleet",
+      "isPrivate": false
+    },
+    {
+      "_id": "wrk_fleet",
+      "_type": "workspace",
+      "name": "Aivacol Fleet Management",
+      "description": "API de Gestão de Frota — Teste Técnico Aivacol\n\nComo usar:\n1. Execute POST /auth/login\n2. Copie o access_token da resposta\n3. Cole em Environments > access_token\n4. Todas as demais requisições usarão o token automaticamente",
+      "scope": "collection"
+    },
+
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "name": "🔐 Autenticação",
+      "description": "Endpoints de autenticação JWT",
+      "parentId": "wrk_fleet"
+    },
+    {
+      "_id": "req_auth_login",
+      "_type": "request",
+      "name": "Login",
+      "description": "Autentica com email e senha. Copie o access_token retornado e cole na variável de ambiente.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"aivacol@aivacol.com\",\n  \"password\": \"aivacol@123\"\n}"
+      },
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_login_invalid",
+      "_type": "request",
+      "name": "Login — credenciais inválidas (401)",
+      "description": "Deve retornar 401 Unauthorized",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"wrong@email.com\",\n  \"password\": \"wrongpassword\"\n}"
+      },
+      "parentId": "fld_auth"
+    },
+    {
+      "_id": "req_auth_no_token",
+      "_type": "request",
+      "name": "Rota protegida sem token (401)",
+      "description": "Qualquer rota sem token deve retornar 401",
+      "method": "GET",
+      "url": "{{ _.base_url }}/models",
+      "headers": [],
+      "parentId": "fld_auth"
+    }
+  ]
+}

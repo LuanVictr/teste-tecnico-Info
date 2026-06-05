@@ -4,19 +4,29 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Public } from './public.decorator';
 
-@ApiTags('auth')
+@ApiTags('🔐 Autenticação')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post('login')
-  @ApiOperation({ summary: 'Authenticate and receive JWT token' })
-  @ApiResponse({ status: 200, description: 'Returns access_token' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiOperation({
+    summary: 'Autenticar usuário',
+    description: 'Autentica com email e senha e retorna um JWT. Use o token retornado no header `Authorization: Bearer <token>` em todas as demais requisições.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Autenticação bem-sucedida',
+    schema: {
+      example: { access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Dados inválidos (email ou senha ausentes)' })
+  @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
   async login(@Body() dto: LoginDto) {
     const user = await this.authService.validateUser(dto.email, dto.password);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw new UnauthorizedException('Credenciais inválidas');
     return this.authService.login(user);
   }
 }
