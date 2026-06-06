@@ -74,10 +74,10 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('returns access_token signed with userId and email', async () => {
+    it('returns access_token signed with userId and email', () => {
       const user = { id: 1, email: 'aivacol@aivacol.com', nickname: 'aivacol' };
 
-      const result = await service.login(user);
+      const result = service.login(user);
 
       expect(result).toEqual({ access_token: 'mock.jwt.token' });
       expect(mockJwtService.sign).toHaveBeenCalledWith({

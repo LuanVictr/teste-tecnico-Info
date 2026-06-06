@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
+import { AppCacheModule } from './shared/cache/cache.module';
 
 @Module({
   imports: [
@@ -10,7 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       useFactory: (config: ConfigService) => ({
         type: 'mssql',
         host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 1433),
+        port: parseInt(config.get<string>('DB_PORT', '1433'), 10),
         username: config.get<string>('DB_USERNAME', 'sa'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE', 'fleet_management'),
@@ -24,6 +26,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         },
       }),
     }),
+    AppCacheModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
