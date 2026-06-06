@@ -12,7 +12,7 @@ import { AppCacheModule } from './shared/cache/cache.module';
       useFactory: (config: ConfigService) => ({
         type: 'mssql',
         host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 1433),
+        port: parseInt(config.get<string>('DB_PORT', '1433'), 10),
         username: config.get<string>('DB_USERNAME', 'sa'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE', 'fleet_management'),

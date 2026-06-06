@@ -17,11 +17,11 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return null;
 
-    const { password: _pwd, ...result } = user;
+    const { password: _, ...result } = user;
     return result;
   }
 
-  async login(user: { id: number; email: string }) {
+  login(user: { id: number; email: string }) {
     return {
       access_token: this.jwtService.sign({ sub: user.id, email: user.email }),
     };

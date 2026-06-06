@@ -10,14 +10,18 @@ import { redisStore } from 'cache-manager-redis-yet';
       imports: [ConfigModule],
       inject: [ConfigService],
       isGlobal: true,
-      useFactory: async (config: ConfigService) => ({
-        store: redisStore,
-        socket: {
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-        },
-        ttl: config.get<number>('CACHE_TTL_SECONDS', 60) * 1000,
-      }),
+      useFactory: (config: ConfigService) => {
+        const password = config.get<string>('REDIS_PASSWORD');
+        return {
+          store: redisStore,
+          socket: {
+            host: config.get<string>('REDIS_HOST', 'localhost'),
+            port: parseInt(config.get<string>('REDIS_PORT', '6379'), 10),
+          },
+          ...(password && { password }),
+          ttl: config.get<number>('CACHE_TTL_SECONDS', 60) * 1000,
+        };
+      },
     }),
   ],
   exports: [CacheModule],

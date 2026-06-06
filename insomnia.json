@@ -1,9 +1,17 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2026-06-05T00:00:00.000Z",
+  "__export_date": "2026-06-06T00:00:00.000Z",
   "__export_source": "aivacol-fleet-management",
   "resources": [
+    {
+      "_id": "wrk_fleet",
+      "_type": "workspace",
+      "name": "Aivacol Fleet Management",
+      "description": "API de Gestão de Frota — Teste Técnico Aivacol\n\nComo usar:\n1. Execute POST /auth/login\n2. Copie o access_token da resposta\n3. Cole em Environments > access_token\n4. Todas as demais requisições usarão o token automaticamente",
+      "scope": "collection"
+    },
+
     {
       "_id": "env_base",
       "_type": "environment",
@@ -36,13 +44,6 @@
       "parentId": "wrk_fleet",
       "isPrivate": false
     },
-    {
-      "_id": "wrk_fleet",
-      "_type": "workspace",
-      "name": "Aivacol Fleet Management",
-      "description": "API de Gestão de Frota — Teste Técnico Aivacol\n\nComo usar:\n1. Execute POST /auth/login\n2. Copie o access_token da resposta\n3. Cole em Environments > access_token\n4. Todas as demais requisições usarão o token automaticamente",
-      "scope": "collection"
-    },
 
     {
       "_id": "fld_auth",
@@ -55,7 +56,7 @@
       "_id": "req_auth_login",
       "_type": "request",
       "name": "Login",
-      "description": "Autentica com email e senha. Copie o access_token retornado e cole na variável de ambiente.",
+      "description": "Autentica com email e senha. O access_token é salvo automaticamente no ambiente via script pós-resposta.",
       "method": "POST",
       "url": "{{ _.base_url }}/auth/login",
       "headers": [
@@ -65,6 +66,7 @@
         "mimeType": "application/json",
         "text": "{\n  \"email\": \"aivacol@aivacol.com\",\n  \"password\": \"aivacol@123\"\n}"
       },
+      "afterResponseScript": "const body = insomnia.response.json();\nif (body.access_token) {\n  insomnia.environment.set('access_token', body.access_token);\n  console.log('✅ access_token salvo no ambiente automaticamente');\n} else {\n  console.error('❌ access_token não encontrado na resposta');\n}",
       "parentId": "fld_auth"
     },
     {
@@ -89,9 +91,104 @@
       "name": "Rota protegida sem token (401)",
       "description": "Qualquer rota sem token deve retornar 401",
       "method": "GET",
-      "url": "{{ _.base_url }}/models",
+      "url": "{{ _.base_url }}/users",
       "headers": [],
       "parentId": "fld_auth"
+    },
+
+    {
+      "_id": "fld_users",
+      "_type": "request_group",
+      "name": "👤 Usuários",
+      "description": "CRUD de usuários. Todas as rotas requerem Bearer token.",
+      "parentId": "wrk_fleet"
+    },
+    {
+      "_id": "req_users_list",
+      "_type": "request",
+      "name": "Listar usuários",
+      "description": "Retorna lista paginada de usuários. Parâmetros: page, limit.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users?page=1&limit=20",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parentId": "fld_users"
+    },
+    {
+      "_id": "req_users_get",
+      "_type": "request",
+      "name": "Buscar usuário por ID",
+      "description": "Retorna um usuário pelo ID. Substitua :id pelo ID desejado.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/users/1",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parentId": "fld_users"
+    },
+    {
+      "_id": "req_users_create",
+      "_type": "request",
+      "name": "Criar usuário",
+      "description": "Cria um novo usuário. Email deve ser único.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/users",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nickname\": \"joao\",\n  \"name\": \"João Silva\",\n  \"email\": \"joao@example.com\",\n  \"password\": \"Senha@123\"\n}"
+      },
+      "parentId": "fld_users"
+    },
+    {
+      "_id": "req_users_update",
+      "_type": "request",
+      "name": "Atualizar usuário",
+      "description": "Atualiza parcialmente um usuário. Todos os campos são opcionais.",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/users/1",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"João Silva Atualizado\"\n}"
+      },
+      "parentId": "fld_users"
+    },
+    {
+      "_id": "req_users_delete",
+      "_type": "request",
+      "name": "Remover usuário",
+      "description": "Remove um usuário pelo ID.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/users/1",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parentId": "fld_users"
+    },
+    {
+      "_id": "req_users_create_conflict",
+      "_type": "request",
+      "name": "Criar usuário — email duplicado (409)",
+      "description": "Deve retornar 409 Conflict quando o email já existe.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/users",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nickname\": \"aivacol\",\n  \"name\": \"Aivacol Admin\",\n  \"email\": \"aivacol@aivacol.com\",\n  \"password\": \"Senha@123\"\n}"
+      },
+      "parentId": "fld_users"
     }
   ]
 }

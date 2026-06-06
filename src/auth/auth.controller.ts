@@ -13,7 +13,8 @@ export class AuthController {
   @Post('login')
   @ApiOperation({
     summary: 'Autenticar usuário',
-    description: 'Autentica com email e senha e retorna um JWT. Use o token retornado no header `Authorization: Bearer <token>` em todas as demais requisições.',
+    description:
+      'Autentica com email e senha e retorna um JWT. Use o token retornado no header `Authorization: Bearer <token>` em todas as demais requisições.',
   })
   @ApiResponse({
     status: 200,

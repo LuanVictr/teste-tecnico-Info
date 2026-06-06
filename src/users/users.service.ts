@@ -20,19 +20,19 @@ export class UsersService implements OnModuleInit {
   }
 
   private async seedAdminUser() {
-    const email = this.config.get<string>('SEED_USER_EMAIL', 'aivacol@aivacol.com');
+    const email = this.config.getOrThrow<string>('SEED_USER_EMAIL');
     const existing = await this.repo.findOne({ where: { email } });
     if (existing) return;
 
-    const saltRounds = this.config.get<number>('BCRYPT_SALT_ROUNDS', 10);
+    const saltRounds = parseInt(this.config.getOrThrow<string>('BCRYPT_SALT_ROUNDS'), 10);
     const password = await bcrypt.hash(
-      this.config.get<string>('SEED_USER_PASSWORD', 'aivacol@123'),
+      this.config.getOrThrow<string>('SEED_USER_PASSWORD'),
       saltRounds,
     );
 
     await this.repo.save({
-      nickname: this.config.get<string>('SEED_USER_NICKNAME', 'aivacol'),
-      name: this.config.get<string>('SEED_USER_NAME', 'Aivacol Admin'),
+      nickname: this.config.getOrThrow<string>('SEED_USER_NICKNAME'),
+      name: this.config.getOrThrow<string>('SEED_USER_NAME'),
       email,
       password,
     });
@@ -65,15 +65,18 @@ export class UsersService implements OnModuleInit {
     const existing = await this.repo.findOne({ where: { email: data.email } });
     if (existing) throw new ConflictException(`Email '${data.email}' já está em uso`);
 
-    const saltRounds = this.config.get<number>('BCRYPT_SALT_ROUNDS', 10);
+    const saltRounds = parseInt(this.config.get<string>('BCRYPT_SALT_ROUNDS', '10'), 10);
     const password = await bcrypt.hash(data.password, saltRounds);
     const user = this.repo.create({ ...data, password });
     return this.repo.save(user);
   }
 
-  async update(id: number, data: Partial<{ nickname: string; name: string; email: string; password: string }>) {
+  async update(
+    id: number,
+    data: Partial<{ nickname: string; name: string; email: string; password: string }>,
+  ) {
     const user = await this.findById(id);
-    const saltRounds = this.config.get<number>('BCRYPT_SALT_ROUNDS', 10);
+    const saltRounds = parseInt(this.config.get<string>('BCRYPT_SALT_ROUNDS', '10'), 10);
     if (data.password) data.password = await bcrypt.hash(data.password, saltRounds);
     Object.assign(user, data);
     return this.repo.save(user);

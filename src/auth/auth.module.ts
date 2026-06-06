@@ -16,7 +16,7 @@ import { UsersModule } from '../users/users.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (config: ConfigService): Promise<JwtModuleOptions> => {
+      useFactory: (config: ConfigService): JwtModuleOptions => {
         const expiration = config.get<string>('JWT_EXPIRATION', '1d');
         return {
           secret: config.get<string>('JWT_SECRET', 'default-secret'),
