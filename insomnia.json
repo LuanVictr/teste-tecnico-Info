@@ -97,6 +97,96 @@
     },
 
     {
+      "_id": "fld_models",
+      "_type": "request_group",
+      "name": "🚗 Modelos",
+      "description": "CRUD de modelos de veículos. Todas as rotas requerem Bearer token.",
+      "parentId": "wrk_fleet"
+    },
+    {
+      "_id": "req_models_list",
+      "_type": "request",
+      "name": "Listar modelos",
+      "description": "Retorna lista paginada de modelos. Parâmetros: page, limit.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/models?page=1&limit=20",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parentId": "fld_models"
+    },
+    {
+      "_id": "req_models_get",
+      "_type": "request",
+      "name": "Buscar modelo por ID",
+      "description": "Retorna um modelo pelo ID.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/models/1",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parentId": "fld_models"
+    },
+    {
+      "_id": "req_models_create",
+      "_type": "request",
+      "name": "Criar modelo",
+      "description": "Cria um novo modelo de veículo.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/models",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Gol\"\n}"
+      },
+      "parentId": "fld_models"
+    },
+    {
+      "_id": "req_models_update",
+      "_type": "request",
+      "name": "Atualizar modelo",
+      "description": "Atualiza parcialmente um modelo.",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/models/1",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Gol G7\"\n}"
+      },
+      "parentId": "fld_models"
+    },
+    {
+      "_id": "req_models_delete",
+      "_type": "request",
+      "name": "Remover modelo",
+      "description": "Remove um modelo. Retorna 409 se houver veículos associados.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/models/1",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parentId": "fld_models"
+    },
+    {
+      "_id": "req_models_delete_conflict",
+      "_type": "request",
+      "name": "Remover modelo — com veículos (409)",
+      "description": "Deve retornar 409 com mensagem descritiva quando há veículos associados.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/models/1",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "parentId": "fld_models"
+    },
+
+    {
       "_id": "fld_users",
       "_type": "request_group",
       "name": "👤 Usuários",
