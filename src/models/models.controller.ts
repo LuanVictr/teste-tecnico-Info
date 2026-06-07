@@ -8,10 +8,9 @@ import {
   Patch,
   Post,
   Query,
-  Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { CurrentUser, AuthUser } from '../auth/current-user.decorator';
 import { ModelsService } from './models.service';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
@@ -28,8 +27,7 @@ export class ModelsController {
   @ApiResponse({ status: 201, description: 'Modelo criado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  create(@Body() dto: CreateModelDto, @Req() req: Request) {
-    const user = req.user as { userId: number };
+  create(@Body() dto: CreateModelDto, @CurrentUser() user: AuthUser) {
     return this.modelsService.create(dto, user.userId);
   }
 
@@ -55,8 +53,11 @@ export class ModelsController {
   @ApiResponse({ status: 200, description: 'Modelo atualizado com sucesso' })
   @ApiResponse({ status: 404, description: 'Modelo não encontrado' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateModelDto, @Req() req: Request) {
-    const user = req.user as { userId: number };
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateModelDto,
+    @CurrentUser() user: AuthUser,
+  ) {
     return this.modelsService.update(id, dto, user.userId);
   }
 

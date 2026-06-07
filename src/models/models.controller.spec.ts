@@ -32,7 +32,7 @@ describe('ModelsController', () => {
       const model = { id: 1, name: 'Gol', created_at: new Date(), updated_at: new Date() };
       mockService.create.mockResolvedValue(model);
 
-      const result = await controller.create(dto, { user: mockUser } as any);
+      const result = await controller.create(dto, mockUser);
 
       expect(result).toEqual(model);
       expect(mockService.create).toHaveBeenCalledWith(dto, mockUser.userId);
@@ -74,7 +74,7 @@ describe('ModelsController', () => {
     it('returns updated model', async () => {
       mockService.update.mockResolvedValue({ id: 1, name: 'Gol G7' });
 
-      const result = await controller.update(1, { name: 'Gol G7' }, { user: mockUser } as any);
+      const result = await controller.update(1, { name: 'Gol G7' }, mockUser);
 
       expect(result.name).toBe('Gol G7');
     });
