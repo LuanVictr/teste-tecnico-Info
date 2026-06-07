@@ -10,7 +10,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, AuthUser } from '../auth/current-user.decorator';
+import { CurrentUser } from '../auth/current-user.decorator';
+import type { AuthUser } from '../auth/current-user.decorator';
 import { ModelsService } from './models.service';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
@@ -27,16 +28,16 @@ export class ModelsController {
   @ApiResponse({ status: 201, description: 'Modelo criado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  create(@Body() dto: CreateModelDto, @CurrentUser() user: AuthUser) {
-    return this.modelsService.create(dto, user.userId);
+  create(@Body() body: CreateModelDto, @CurrentUser() currentUser: AuthUser) {
+    return this.modelsService.create(body, currentUser.userId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar modelos', description: 'Retorna lista paginada de modelos.' })
   @ApiResponse({ status: 200, description: 'Lista retornada com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  findAll(@Query() dto: ListModelsDto) {
-    return this.modelsService.findAll(dto);
+  findAll(@Query() filters: ListModelsDto) {
+    return this.modelsService.findAll(filters);
   }
 
   @Get(':id')
@@ -55,10 +56,10 @@ export class ModelsController {
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateModelDto,
-    @CurrentUser() user: AuthUser,
+    @Body() changes: UpdateModelDto,
+    @CurrentUser() currentUser: AuthUser,
   ) {
-    return this.modelsService.update(id, dto, user.userId);
+    return this.modelsService.update(id, changes, currentUser.userId);
   }
 
   @Delete(':id')

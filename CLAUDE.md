@@ -65,6 +65,7 @@ A Aivacol precisa de um backend robusto para o módulo de Gestão de Frota, capa
 | created_at | datetime | Data de criação |
 | updated_at | datetime | Data de atualização |
 | created_by | int/uuid | FK → users (bônus) |
+| deleted_at | datetime | Soft delete |
 
 ### Tabela `vehicles` (obrigatória)
 | Campo | Tipo | Descrição |
@@ -78,6 +79,7 @@ A Aivacol precisa de um backend robusto para o módulo de Gestão de Frota, capa
 | created_at | datetime | Criado em |
 | updated_at | datetime | Atualizado em |
 | created_by | int/uuid | FK → users (bônus) |
+| deleted_at | datetime | Soft delete |
 
 ### Tabela `brands` (bônus)
 | Campo | Tipo | Descrição |
@@ -87,6 +89,7 @@ A Aivacol precisa de um backend robusto para o módulo de Gestão de Frota, capa
 | created_at | datetime | — |
 | updated_at | datetime | — |
 | created_by | int/uuid | FK → users |
+| deleted_at | datetime | Soft delete |
 
 ### Tabela `users` (bônus)
 | Campo | Tipo | Descrição |
@@ -96,9 +99,11 @@ A Aivacol precisa de um backend robusto para o módulo de Gestão de Frota, capa
 | name | varchar | Nome completo |
 | email | varchar | Email (unique) |
 | password_hash | varchar | Bcrypt hash |
+| deleted_at | datetime | Soft delete |
 
 > `brands` tem relacionamento com `models` (1 brand → N models).
 > `created_by` em todas as tabelas referencia `users`.
+> `deleted_at` em todas as tabelas — soft delete via TypeORM `@DeleteDateColumn`.
 
 ---
 

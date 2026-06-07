@@ -42,7 +42,8 @@ CREATE TABLE users (
   email       NVARCHAR(255) NOT NULL UNIQUE,
   password    NVARCHAR(255) NOT NULL,   -- bcrypt hash
   created_at  DATETIME2     NOT NULL DEFAULT GETDATE(),
-  updated_at  DATETIME2     NOT NULL DEFAULT GETDATE()
+  updated_at  DATETIME2     NOT NULL DEFAULT GETDATE(),
+  deleted_at  DATETIME2     NULL
 );
 ```
 
@@ -62,7 +63,8 @@ CREATE TABLE brands (
   name        NVARCHAR(100) NOT NULL UNIQUE,
   created_at  DATETIME2     NOT NULL DEFAULT GETDATE(),
   updated_at  DATETIME2     NOT NULL DEFAULT GETDATE(),
-  created_by  INT           NULL REFERENCES users(id)
+  created_by  INT           NULL REFERENCES users(id),
+  deleted_at  DATETIME2     NULL
 );
 ```
 
@@ -82,7 +84,8 @@ CREATE TABLE models (
   brand_id    INT           NULL REFERENCES brands(id),
   created_at  DATETIME2     NOT NULL DEFAULT GETDATE(),
   updated_at  DATETIME2     NOT NULL DEFAULT GETDATE(),
-  created_by  INT           NULL REFERENCES users(id)
+  created_by  INT           NULL REFERENCES users(id),
+  deleted_at  DATETIME2     NULL
 );
 ```
 
@@ -105,7 +108,8 @@ CREATE TABLE vehicles (
   model_id      INT           NOT NULL REFERENCES models(id),
   created_at    DATETIME2     NOT NULL DEFAULT GETDATE(),
   updated_at    DATETIME2     NOT NULL DEFAULT GETDATE(),
-  created_by    INT           NULL REFERENCES users(id)
+  created_by    INT           NULL REFERENCES users(id),
+  deleted_at    DATETIME2     NULL
 );
 
 CREATE INDEX IX_vehicles_model_id ON vehicles(model_id);
@@ -167,6 +171,7 @@ export class User {
   @Column()                  password: string;       // bcrypt hash
   @CreateDateColumn()        created_at: Date;
   @UpdateDateColumn()        updated_at: Date;
+  @DeleteDateColumn()        deleted_at: Date;
 }
 ```
 
@@ -174,13 +179,14 @@ export class User {
 ```typescript
 @Entity('brands')
 export class Brand {
-  @PrimaryGeneratedColumn()           id: number;
+  @PrimaryGeneratedColumn()              id: number;
   @Column({ length: 100, unique: true }) name: string;
-  @CreateDateColumn()                 created_at: Date;
-  @UpdateDateColumn()                 updated_at: Date;
-  @Column({ nullable: true })         created_by: number;
-  @ManyToOne(() => User, { nullable: true }) creator: User;
-  @OneToMany(() => Model, m => m.brand)      models: Model[];
+  @CreateDateColumn()                    created_at: Date;
+  @UpdateDateColumn()                    updated_at: Date;
+  @Column({ nullable: true })            created_by: number;
+  @ManyToOne(() => User, { nullable: true })  creator: User;
+  @OneToMany(() => Model, m => m.brand)       models: Model[];
+  @DeleteDateColumn()                    deleted_at: Date;
 }
 ```
 
@@ -197,6 +203,7 @@ export class Model {
   @Column({ nullable: true }) created_by: number;
   @ManyToOne(() => User, { nullable: true }) creator: User;
   @OneToMany(() => Vehicle, v => v.model) vehicles: Vehicle[];
+  @DeleteDateColumn()        deleted_at: Date;
 }
 ```
 
@@ -204,17 +211,18 @@ export class Model {
 ```typescript
 @Entity('vehicles')
 export class Vehicle {
-  @PrimaryGeneratedColumn()                 id: number;
-  @Column({ length: 10, unique: true })     license_plate: string;
-  @Column({ length: 17, unique: true })     chassis: string;
-  @Column({ length: 11, unique: true })     renavam: string;
-  @Column('smallint')                       year: number;
-  @Column()                                 model_id: number;
-  @ManyToOne(() => Model, { eager: false }) model: Model;
-  @CreateDateColumn()                       created_at: Date;
-  @UpdateDateColumn()                       updated_at: Date;
-  @Column({ nullable: true })               created_by: number;
+  @PrimaryGeneratedColumn()                  id: number;
+  @Column({ length: 10, unique: true })      license_plate: string;
+  @Column({ length: 17, unique: true })      chassis: string;
+  @Column({ length: 11, unique: true })      renavam: string;
+  @Column('smallint')                        year: number;
+  @Column()                                  model_id: number;
+  @ManyToOne(() => Model, { eager: false })  model: Model;
+  @CreateDateColumn()                        created_at: Date;
+  @UpdateDateColumn()                        updated_at: Date;
+  @Column({ nullable: true })                created_by: number;
   @ManyToOne(() => User, { nullable: true }) creator: User;
+  @DeleteDateColumn()                        deleted_at: Date;
 }
 ```
 

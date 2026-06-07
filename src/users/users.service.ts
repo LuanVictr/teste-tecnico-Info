@@ -11,7 +11,7 @@ import { PaginationDto } from '../shared/pagination/pagination.dto';
 export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
-    private readonly repo: Repository<User>,
+    private readonly userRepository: Repository<User>,
     private readonly config: ConfigService,
   ) {}
 
@@ -21,7 +21,7 @@ export class UsersService implements OnModuleInit {
 
   private async seedAdminUser() {
     const email = this.config.getOrThrow<string>('SEED_USER_EMAIL');
-    const existing = await this.repo.findOne({ where: { email } });
+    const existing = await this.userRepository.findOne({ where: { email } });
     if (existing) return;
 
     const saltRounds = parseInt(this.config.getOrThrow<string>('BCRYPT_SALT_ROUNDS'), 10);
@@ -30,7 +30,7 @@ export class UsersService implements OnModuleInit {
       saltRounds,
     );
 
-    await this.repo.save({
+    await this.userRepository.save({
       nickname: this.config.getOrThrow<string>('SEED_USER_NICKNAME'),
       name: this.config.getOrThrow<string>('SEED_USER_NAME'),
       email,
@@ -39,7 +39,7 @@ export class UsersService implements OnModuleInit {
   }
 
   async findByEmailWithPassword(email: string): Promise<User | null> {
-    return this.repo
+    return this.userRepository
       .createQueryBuilder('user')
       .addSelect('user.password')
       .where('user.email = :email', { email })
@@ -47,44 +47,46 @@ export class UsersService implements OnModuleInit {
   }
 
   async findById(id: number): Promise<User> {
-    const user = await this.repo.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException(`Usuário com id ${id} não encontrado`);
     return user;
   }
 
-  async findAll(dto: PaginationDto) {
-    const [items, total] = await this.repo.findAndCount({
-      skip: (dto.page - 1) * dto.limit,
-      take: dto.limit,
+  async findAll(pagination: PaginationDto) {
+    const [users, total] = await this.userRepository.findAndCount({
+      skip: (pagination.page - 1) * pagination.limit,
+      take: pagination.limit,
       order: { created_at: 'DESC' },
     });
-    return paginate(items, total, dto.page, dto.limit);
+    return paginate(users, total, pagination.page, pagination.limit);
   }
 
   async create(data: { nickname: string; name: string; email: string; password: string }) {
-    const existing = await this.repo.findOne({ where: { email: data.email } });
+    const existing = await this.userRepository.findOne({ where: { email: data.email } });
     if (existing) throw new ConflictException(`Email '${data.email}' já está em uso`);
 
     const saltRounds = parseInt(this.config.get<string>('BCRYPT_SALT_ROUNDS', '10'), 10);
-    const password = await bcrypt.hash(data.password, saltRounds);
-    const user = this.repo.create({ ...data, password });
-    return this.repo.save(user);
+    const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+    const user = this.userRepository.create({ ...data, password: hashedPassword });
+    return this.userRepository.save(user);
   }
 
   async update(
     id: number,
-    data: Partial<{ nickname: string; name: string; email: string; password: string }>,
+    changes: Partial<{ nickname: string; name: string; email: string; password: string }>,
   ) {
     const user = await this.findById(id);
     const saltRounds = parseInt(this.config.get<string>('BCRYPT_SALT_ROUNDS', '10'), 10);
-    if (data.password) data.password = await bcrypt.hash(data.password, saltRounds);
-    Object.assign(user, data);
-    return this.repo.save(user);
+    if (changes.password) {
+      changes.password = await bcrypt.hash(changes.password, saltRounds);
+    }
+    Object.assign(user, changes);
+    return this.userRepository.save(user);
   }
 
   async remove(id: number) {
     const user = await this.findById(id);
-    await this.repo.remove(user);
+    await this.userRepository.remove(user);
     return { message: 'Usuário removido com sucesso' };
   }
 }

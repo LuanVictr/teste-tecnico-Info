@@ -41,6 +41,11 @@ export class CreateModelsTable1749254400000 implements MigrationInterface {
             type: 'int',
             isNullable: true,
           },
+          {
+            name: 'deleted_at',
+            type: 'datetime2',
+            isNullable: true,
+          },
         ],
       }),
       true,

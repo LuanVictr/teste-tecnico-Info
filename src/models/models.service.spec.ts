@@ -6,12 +6,12 @@ import { Model } from './models.entity';
 
 const mockVehicleRepo = { count: jest.fn() };
 
-const mockRepo = {
+const mockModelRepository = {
   findOne: jest.fn(),
   findAndCount: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
-  remove: jest.fn(),
+  softRemove: jest.fn(),
   manager: {
     getRepository: jest.fn().mockReturnValue(mockVehicleRepo),
   },
@@ -22,7 +22,7 @@ describe('ModelsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ModelsService, { provide: getRepositoryToken(Model), useValue: mockRepo }],
+      providers: [ModelsService, { provide: getRepositoryToken(Model), useValue: mockModelRepository }],
     }).compile();
 
     service = module.get<ModelsService>(ModelsService);
@@ -33,20 +33,20 @@ describe('ModelsService', () => {
     it('returns created model with metadata', async () => {
       const dto = { name: 'Gol' };
       const saved = { id: 1, name: 'Gol', created_at: new Date(), updated_at: new Date() };
-      mockRepo.create.mockReturnValue(saved);
-      mockRepo.save.mockResolvedValue(saved);
+      mockModelRepository.create.mockReturnValue(saved);
+      mockModelRepository.save.mockResolvedValue(saved);
 
       const result = await service.create(dto, 1);
 
       expect(result).toEqual(saved);
-      expect(mockRepo.create).toHaveBeenCalledWith({ name: 'Gol', created_by: 1 });
+      expect(mockModelRepository.create).toHaveBeenCalledWith({ name: 'Gol', created_by: 1 });
     });
   });
 
   describe('findAll', () => {
     it('returns paginated result with meta', async () => {
       const models = [{ id: 1, name: 'Gol' }];
-      mockRepo.findAndCount.mockResolvedValue([models, 1]);
+      mockModelRepository.findAndCount.mockResolvedValue([models, 1]);
 
       const result = await service.findAll({ page: 1, limit: 20 });
 
@@ -58,7 +58,7 @@ describe('ModelsService', () => {
   describe('findOne', () => {
     it('returns model when found', async () => {
       const model = { id: 1, name: 'Gol' };
-      mockRepo.findOne.mockResolvedValue(model);
+      mockModelRepository.findOne.mockResolvedValue(model);
 
       const result = await service.findOne(1);
 
@@ -66,7 +66,7 @@ describe('ModelsService', () => {
     });
 
     it('throws NotFoundException when not found', async () => {
-      mockRepo.findOne.mockResolvedValue(null);
+      mockModelRepository.findOne.mockResolvedValue(null);
 
       await expect(service.findOne(99)).rejects.toThrow(NotFoundException);
     });
@@ -76,8 +76,8 @@ describe('ModelsService', () => {
     it('updates and returns model', async () => {
       const model = { id: 1, name: 'Gol' };
       const updated = { ...model, name: 'Gol G7' };
-      mockRepo.findOne.mockResolvedValue(model);
-      mockRepo.save.mockResolvedValue(updated);
+      mockModelRepository.findOne.mockResolvedValue(model);
+      mockModelRepository.save.mockResolvedValue(updated);
 
       const result = await service.update(1, { name: 'Gol G7' }, 1);
 
@@ -85,7 +85,7 @@ describe('ModelsService', () => {
     });
 
     it('throws NotFoundException when model not found', async () => {
-      mockRepo.findOne.mockResolvedValue(null);
+      mockModelRepository.findOne.mockResolvedValue(null);
 
       await expect(service.update(99, { name: 'X' }, 1)).rejects.toThrow(NotFoundException);
     });
@@ -93,7 +93,7 @@ describe('ModelsService', () => {
 
   describe('remove', () => {
     it('throws ConflictException with vehicle count when vehicles exist', async () => {
-      mockRepo.findOne.mockResolvedValue({ id: 1, name: 'Gol' });
+      mockModelRepository.findOne.mockResolvedValue({ id: 1, name: 'Gol' });
       mockVehicleRepo.count.mockResolvedValue(3);
 
       await expect(service.remove(1)).rejects.toThrow(ConflictException);
@@ -104,9 +104,9 @@ describe('ModelsService', () => {
 
     it('removes model when no vehicles exist', async () => {
       const model = { id: 1, name: 'Gol' };
-      mockRepo.findOne.mockResolvedValue(model);
+      mockModelRepository.findOne.mockResolvedValue(model);
       mockVehicleRepo.count.mockResolvedValue(0);
-      mockRepo.remove.mockResolvedValue(model);
+      mockModelRepository.softRemove.mockResolvedValue(model);
 
       const result = await service.remove(1);
 

@@ -1,10 +1,10 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -34,6 +34,6 @@ export class Model {
   @JoinColumn({ name: 'created_by' })
   creator: User;
 
-  @OneToMany('Vehicle', 'model')
-  vehicles: unknown[];
+  @DeleteDateColumn({ type: 'datetime2', nullable: true })
+  deleted_at: Date;
 }

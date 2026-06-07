@@ -11,48 +11,48 @@ import { paginate } from '../shared/pagination/paginate.helper';
 export class ModelsService {
   constructor(
     @InjectRepository(Model)
-    private readonly repo: Repository<Model>,
+    private readonly modelRepository: Repository<Model>,
   ) {}
 
-  async create(dto: CreateModelDto, userId: number) {
-    const model = this.repo.create({ ...dto, created_by: userId });
-    return this.repo.save(model);
+  async create(data: CreateModelDto, userId: number) {
+    const model = this.modelRepository.create({ ...data, created_by: userId });
+    return this.modelRepository.save(model);
   }
 
-  async findAll(dto: ListModelsDto) {
-    const [items, total] = await this.repo.findAndCount({
-      skip: (dto.page - 1) * dto.limit,
-      take: dto.limit,
+  async findAll(filters: ListModelsDto) {
+    const [models, total] = await this.modelRepository.findAndCount({
+      skip: (filters.page - 1) * filters.limit,
+      take: filters.limit,
       order: { created_at: 'DESC' },
     });
-    return paginate(items, total, dto.page, dto.limit);
+    return paginate(models, total, filters.page, filters.limit);
   }
 
   async findOne(id: number) {
-    const model = await this.repo.findOne({ where: { id } });
+    const model = await this.modelRepository.findOne({ where: { id } });
     if (!model) throw new NotFoundException(`Modelo com id ${id} não encontrado`);
     return model;
   }
 
-  async update(id: number, dto: UpdateModelDto, userId: number) {
+  async update(id: number, changes: UpdateModelDto, _userId: number) {
     const model = await this.findOne(id);
-    Object.assign(model, { ...dto, updated_by: userId });
-    return this.repo.save(model);
+    Object.assign(model, changes);
+    return this.modelRepository.save(model);
   }
 
   async remove(id: number) {
     const model = await this.findOne(id);
-    const vehicleCount = await this.repo.manager
+    const vehicleCount = await this.modelRepository.manager
       .getRepository('Vehicle')
       .count({ where: { model_id: id } });
 
-    if (vehicleCount > 0) {
+    if (vehicleCount) {
       throw new ConflictException(
         `Cannot delete model: ${vehicleCount} vehicle(s) are still associated with this model.`,
       );
     }
 
-    await this.repo.remove(model);
+    await this.modelRepository.softRemove(model);
     return { message: 'Modelo removido com sucesso' };
   }
 }

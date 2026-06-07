@@ -25,8 +25,8 @@ export class AuthController {
   })
   @ApiResponse({ status: 400, description: 'Dados inválidos (email ou senha ausentes)' })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
-  async login(@Body() dto: LoginDto) {
-    const user = await this.authService.validateUser(dto.email, dto.password);
+  async login(@Body() credentials: LoginDto) {
+    const user = await this.authService.validateUser(credentials.email, credentials.password);
     if (!user) throw new UnauthorizedException('Credenciais inválidas');
     return this.authService.login(user);
   }
