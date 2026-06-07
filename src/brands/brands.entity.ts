@@ -10,22 +10,14 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../users/users.entity';
-import { Brand } from '../brands/brands.entity';
 
-@Entity('models')
-export class Model {
+@Entity('brands')
+export class Brand {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'nvarchar', length: 100 })
+  @Column({ type: 'nvarchar', length: 100, unique: true })
   name: string;
-
-  @Column({ nullable: true })
-  brand_id: number;
-
-  @ManyToOne(() => Brand, { nullable: true, onDelete: 'SET NULL', eager: false })
-  @JoinColumn({ name: 'brand_id' })
-  brand: Brand;
 
   @CreateDateColumn({ type: 'datetime2' })
   created_at: Date;
@@ -43,6 +35,7 @@ export class Model {
   @DeleteDateColumn({ type: 'datetime2', nullable: true })
   deleted_at: Date;
 
-  @OneToMany('Vehicle', 'model')
-  vehicles: unknown[];
+  // Populated after models are loaded
+  @OneToMany('Model', 'brand')
+  models: unknown[];
 }

@@ -5,27 +5,35 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Model } from '../models/models.entity';
 import { User } from '../users/users.entity';
-import { Brand } from '../brands/brands.entity';
 
-@Entity('models')
-export class Model {
+@Entity('vehicles')
+export class Vehicle {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'nvarchar', length: 100 })
-  name: string;
+  @Column({ type: 'nvarchar', length: 10, unique: true })
+  license_plate: string;
 
-  @Column({ nullable: true })
-  brand_id: number;
+  @Column({ type: 'nvarchar', length: 17, unique: true })
+  chassis: string;
 
-  @ManyToOne(() => Brand, { nullable: true, onDelete: 'SET NULL', eager: false })
-  @JoinColumn({ name: 'brand_id' })
-  brand: Brand;
+  @Column({ type: 'nvarchar', length: 11, unique: true })
+  renavam: string;
+
+  @Column({ type: 'smallint' })
+  year: number;
+
+  @Column()
+  model_id: number;
+
+  @ManyToOne(() => Model, { nullable: false, onDelete: 'RESTRICT', eager: false })
+  @JoinColumn({ name: 'model_id' })
+  model: Model;
 
   @CreateDateColumn({ type: 'datetime2' })
   created_at: Date;
@@ -42,7 +50,4 @@ export class Model {
 
   @DeleteDateColumn({ type: 'datetime2', nullable: true })
   deleted_at: Date;
-
-  @OneToMany('Vehicle', 'model')
-  vehicles: unknown[];
 }

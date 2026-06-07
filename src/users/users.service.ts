@@ -86,7 +86,7 @@ export class UsersService implements OnModuleInit {
 
   async remove(id: number) {
     const user = await this.findById(id);
-    await this.userRepository.remove(user);
+    await this.userRepository.softRemove(user);
     return { message: 'Usuário removido com sucesso' };
   }
 }

@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ModelsModule } from './models/models.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
+import { BrandsModule } from './brands/brands.module';
 import { AppCacheModule } from './shared/cache/cache.module';
 
 @Module({
@@ -30,6 +32,8 @@ import { AppCacheModule } from './shared/cache/cache.module';
     AppCacheModule,
     AuthModule,
     ModelsModule,
+    VehiclesModule,
+    BrandsModule,
   ],
 })
 export class AppModule {}

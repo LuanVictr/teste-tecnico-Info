@@ -1,14 +1,14 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2026-06-06T00:00:00.000Z",
+  "__export_date": "2026-06-07T00:00:00.000Z",
   "__export_source": "aivacol-fleet-management",
   "resources": [
     {
       "_id": "wrk_fleet",
       "_type": "workspace",
       "name": "Aivacol Fleet Management",
-      "description": "API de Gestão de Frota — Teste Técnico Aivacol\n\nComo usar:\n1. Execute POST /auth/login\n2. Copie o access_token da resposta\n3. Cole em Environments > access_token\n4. Todas as demais requisições usarão o token automaticamente",
+      "description": "API de Gestão de Frota — Teste Técnico Aivacol\n\nComo usar:\n1. Execute POST /auth/login\n2. O access_token é salvo automaticamente no ambiente via script pós-resposta\n3. Todas as demais requisições usarão o token automaticamente",
       "scope": "collection"
     },
 
@@ -16,20 +16,14 @@
       "_id": "env_base",
       "_type": "environment",
       "name": "Base Environment",
-      "data": {
-        "base_url": "http://localhost:3000",
-        "access_token": ""
-      },
+      "data": { "base_url": "http://localhost:3000", "access_token": "" },
       "parentId": "wrk_fleet"
     },
     {
       "_id": "env_local",
       "_type": "environment",
       "name": "Local",
-      "data": {
-        "base_url": "http://localhost:3000",
-        "access_token": ""
-      },
+      "data": { "base_url": "http://localhost:3000", "access_token": "" },
       "parentId": "wrk_fleet",
       "isPrivate": false
     },
@@ -37,10 +31,7 @@
       "_id": "env_vps",
       "_type": "environment",
       "name": "VPS (Produção)",
-      "data": {
-        "base_url": "http://SEU_IP_VPS:3000",
-        "access_token": ""
-      },
+      "data": { "base_url": "http://SEU_IP_VPS:3000", "access_token": "" },
       "parentId": "wrk_fleet",
       "isPrivate": false
     },
@@ -59,9 +50,7 @@
       "description": "Autentica com email e senha. O access_token é salvo automaticamente no ambiente via script pós-resposta.",
       "method": "POST",
       "url": "{{ _.base_url }}/auth/login",
-      "headers": [
-        { "name": "Content-Type", "value": "application/json" }
-      ],
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
       "body": {
         "mimeType": "application/json",
         "text": "{\n  \"email\": \"aivacol@aivacol.com\",\n  \"password\": \"aivacol@123\"\n}"
@@ -76,9 +65,7 @@
       "description": "Deve retornar 401 Unauthorized",
       "method": "POST",
       "url": "{{ _.base_url }}/auth/login",
-      "headers": [
-        { "name": "Content-Type", "value": "application/json" }
-      ],
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
       "body": {
         "mimeType": "application/json",
         "text": "{\n  \"email\": \"wrong@email.com\",\n  \"password\": \"wrongpassword\"\n}"
@@ -91,9 +78,116 @@
       "name": "Rota protegida sem token (401)",
       "description": "Qualquer rota sem token deve retornar 401",
       "method": "GET",
-      "url": "{{ _.base_url }}/users",
+      "url": "{{ _.base_url }}/vehicles",
       "headers": [],
       "parentId": "fld_auth"
+    },
+
+    {
+      "_id": "fld_vehicles",
+      "_type": "request_group",
+      "name": "🚙 Veículos",
+      "description": "CRUD de veículos. GET /vehicles e GET /vehicles/:id utilizam cache Redis. Mutações invalidam o cache automaticamente.",
+      "parentId": "wrk_fleet"
+    },
+    {
+      "_id": "req_vehicles_list",
+      "_type": "request",
+      "name": "Listar veículos",
+      "description": "Retorna lista paginada. Filtrável por modelId e year. Cacheado no Redis.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/vehicles?page=1&limit=20",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_vehicles"
+    },
+    {
+      "_id": "req_vehicles_list_filter_model",
+      "_type": "request",
+      "name": "Listar veículos — filtro por modelId",
+      "method": "GET",
+      "url": "{{ _.base_url }}/vehicles?page=1&limit=20&modelId=1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_vehicles"
+    },
+    {
+      "_id": "req_vehicles_list_filter_year",
+      "_type": "request",
+      "name": "Listar veículos — filtro por year",
+      "method": "GET",
+      "url": "{{ _.base_url }}/vehicles?page=1&limit=20&year=2023",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_vehicles"
+    },
+    {
+      "_id": "req_vehicles_get",
+      "_type": "request",
+      "name": "Buscar veículo por ID",
+      "description": "Retorna um veículo pelo ID. Cacheado no Redis.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/vehicles/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_vehicles"
+    },
+    {
+      "_id": "req_vehicles_create",
+      "_type": "request",
+      "name": "Registrar veículo",
+      "description": "Registra um novo veículo. Invalida o cache de lista.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/vehicles",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"license_plate\": \"ABC1D23\",\n  \"chassis\": \"9BWZZZ377VT004251\",\n  \"renavam\": \"01234567890\",\n  \"year\": 2023,\n  \"model_id\": 1\n}"
+      },
+      "parentId": "fld_vehicles"
+    },
+    {
+      "_id": "req_vehicles_update",
+      "_type": "request",
+      "name": "Atualizar veículo",
+      "description": "Atualiza parcialmente um veículo. Invalida o cache de lista e detalhe.",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/vehicles/1",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"year\": 2024\n}"
+      },
+      "parentId": "fld_vehicles"
+    },
+    {
+      "_id": "req_vehicles_delete",
+      "_type": "request",
+      "name": "Remover veículo",
+      "description": "Soft delete do veículo. Invalida o cache.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/vehicles/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_vehicles"
+    },
+    {
+      "_id": "req_vehicles_create_duplicate",
+      "_type": "request",
+      "name": "Registrar veículo — placa duplicada (409)",
+      "description": "Deve retornar 409 Conflict com campo específico na mensagem.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/vehicles",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"license_plate\": \"ABC1D23\",\n  \"chassis\": \"9BWZZZ377VT000000\",\n  \"renavam\": \"00000000001\",\n  \"year\": 2020,\n  \"model_id\": 1\n}"
+      },
+      "parentId": "fld_vehicles"
     },
 
     {
@@ -110,28 +204,38 @@
       "description": "Retorna lista paginada de modelos. Parâmetros: page, limit.",
       "method": "GET",
       "url": "{{ _.base_url }}/models?page=1&limit=20",
-      "headers": [
-        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
-      ],
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
       "parentId": "fld_models"
     },
     {
       "_id": "req_models_get",
       "_type": "request",
       "name": "Buscar modelo por ID",
-      "description": "Retorna um modelo pelo ID.",
       "method": "GET",
       "url": "{{ _.base_url }}/models/1",
-      "headers": [
-        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
-      ],
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
       "parentId": "fld_models"
     },
     {
       "_id": "req_models_create",
       "_type": "request",
       "name": "Criar modelo",
-      "description": "Cria um novo modelo de veículo.",
+      "method": "POST",
+      "url": "{{ _.base_url }}/models",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Gol\",\n  \"brand_id\": 1\n}"
+      },
+      "parentId": "fld_models"
+    },
+    {
+      "_id": "req_models_create_no_brand",
+      "_type": "request",
+      "name": "Criar modelo — sem marca",
       "method": "POST",
       "url": "{{ _.base_url }}/models",
       "headers": [
@@ -148,7 +252,6 @@
       "_id": "req_models_update",
       "_type": "request",
       "name": "Atualizar modelo",
-      "description": "Atualiza parcialmente um modelo.",
       "method": "PATCH",
       "url": "{{ _.base_url }}/models/1",
       "headers": [
@@ -162,28 +265,110 @@
       "parentId": "fld_models"
     },
     {
-      "_id": "req_models_delete",
+      "_id": "req_models_update_brand",
       "_type": "request",
-      "name": "Remover modelo",
-      "description": "Remove um modelo. Retorna 409 se houver veículos associados.",
-      "method": "DELETE",
+      "name": "Associar modelo a marca",
+      "description": "Atualiza o brand_id de um modelo para associá-lo a uma marca.",
+      "method": "PATCH",
       "url": "{{ _.base_url }}/models/1",
       "headers": [
+        { "name": "Content-Type", "value": "application/json" },
         { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
       ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"brand_id\": 1\n}"
+      },
       "parentId": "fld_models"
     },
     {
-      "_id": "req_models_delete_conflict",
+      "_id": "req_models_delete",
       "_type": "request",
-      "name": "Remover modelo — com veículos (409)",
-      "description": "Deve retornar 409 com mensagem descritiva quando há veículos associados.",
+      "name": "Remover modelo",
+      "description": "Remove um modelo (soft delete). Retorna 409 se houver veículos associados.",
       "method": "DELETE",
       "url": "{{ _.base_url }}/models/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_models"
+    },
+
+    {
+      "_id": "fld_brands",
+      "_type": "request_group",
+      "name": "🏷️ Marcas",
+      "description": "CRUD de marcas. GET /brands/:id retorna a marca com seus modelos associados.",
+      "parentId": "wrk_fleet"
+    },
+    {
+      "_id": "req_brands_list",
+      "_type": "request",
+      "name": "Listar marcas",
+      "method": "GET",
+      "url": "{{ _.base_url }}/brands?page=1&limit=20",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_brands"
+    },
+    {
+      "_id": "req_brands_get",
+      "_type": "request",
+      "name": "Buscar marca por ID (com modelos)",
+      "description": "Retorna a marca com o array de modelos associados.",
+      "method": "GET",
+      "url": "{{ _.base_url }}/brands/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_brands"
+    },
+    {
+      "_id": "req_brands_create",
+      "_type": "request",
+      "name": "Criar marca",
+      "method": "POST",
+      "url": "{{ _.base_url }}/brands",
       "headers": [
+        { "name": "Content-Type", "value": "application/json" },
         { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
       ],
-      "parentId": "fld_models"
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Volkswagen\"\n}"
+      },
+      "parentId": "fld_brands"
+    },
+    {
+      "_id": "req_brands_update",
+      "_type": "request",
+      "name": "Atualizar marca",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/brands/1",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"VW\"\n}"
+      },
+      "parentId": "fld_brands"
+    },
+    {
+      "_id": "req_brands_delete",
+      "_type": "request",
+      "name": "Remover marca",
+      "description": "Remove a marca (soft delete). Retorna 409 se houver modelos associados.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/brands/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_brands"
+    },
+    {
+      "_id": "req_brands_delete_conflict",
+      "_type": "request",
+      "name": "Remover marca — com modelos (409)",
+      "description": "Deve retornar 409 com mensagem informando a quantidade de modelos.",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/brands/1",
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
+      "parentId": "fld_brands"
     },
 
     {
@@ -197,24 +382,18 @@
       "_id": "req_users_list",
       "_type": "request",
       "name": "Listar usuários",
-      "description": "Retorna lista paginada de usuários. Parâmetros: page, limit.",
       "method": "GET",
       "url": "{{ _.base_url }}/users?page=1&limit=20",
-      "headers": [
-        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
-      ],
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
       "parentId": "fld_users"
     },
     {
       "_id": "req_users_get",
       "_type": "request",
       "name": "Buscar usuário por ID",
-      "description": "Retorna um usuário pelo ID. Substitua :id pelo ID desejado.",
       "method": "GET",
       "url": "{{ _.base_url }}/users/1",
-      "headers": [
-        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
-      ],
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
       "parentId": "fld_users"
     },
     {
@@ -238,7 +417,6 @@
       "_id": "req_users_update",
       "_type": "request",
       "name": "Atualizar usuário",
-      "description": "Atualiza parcialmente um usuário. Todos os campos são opcionais.",
       "method": "PATCH",
       "url": "{{ _.base_url }}/users/1",
       "headers": [
@@ -255,12 +433,9 @@
       "_id": "req_users_delete",
       "_type": "request",
       "name": "Remover usuário",
-      "description": "Remove um usuário pelo ID.",
       "method": "DELETE",
       "url": "{{ _.base_url }}/users/1",
-      "headers": [
-        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
-      ],
+      "headers": [{ "name": "Authorization", "value": "Bearer {{ _.access_token }}" }],
       "parentId": "fld_users"
     },
     {
