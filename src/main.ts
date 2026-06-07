@@ -14,9 +14,15 @@ async function bootstrap() {
     }),
   );
 
+  const port = process.env.PORT ?? 3000;
+
   const config = new DocumentBuilder()
     .setTitle('Aivacol Fleet Management API')
-    .setDescription('Backend for fleet management — vehicles, models, brands and users')
+    .setDescription(
+      `Backend for fleet management — vehicles, models, brands and users\n\n` +
+        `**Application running on port ${port}**\n\n` +
+        `Swagger UI: http://localhost:${port}/api/docs`,
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -24,7 +30,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT ?? 3000;
   await app.listen(port);
   console.log(`Application running on port ${port}`);
   console.log(`Swagger UI: http://localhost:${port}/api/docs`);
