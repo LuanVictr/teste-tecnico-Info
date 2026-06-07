@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
@@ -30,8 +30,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  const logger = new Logger('Bootstrap');
   await app.listen(port);
-  console.log(`Application running on port ${port}`);
-  console.log(`Swagger UI: http://localhost:${port}/api/docs`);
+  logger.log(`Application running on port ${port}`);
+  logger.log(`Swagger UI: http://localhost:${port}/api/docs`);
 }
 void bootstrap();
