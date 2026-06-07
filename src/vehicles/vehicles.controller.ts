@@ -9,13 +9,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthUser } from '../auth/current-user.decorator';
 import { VehiclesService } from './vehicles.service';
@@ -23,7 +17,7 @@ import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { ListVehiclesDto } from './dto/list-vehicles.dto';
 
-@ApiTags('🚙 Veículos')
+@ApiTags('Veículos')
 @ApiBearerAuth()
 @Controller('vehicles')
 export class VehiclesController {

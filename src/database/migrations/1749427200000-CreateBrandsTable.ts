@@ -34,7 +34,6 @@ export class CreateBrandsTable1749427200000 implements MigrationInterface {
       }),
     );
 
-    // Wire up the existing brand_id column in models to the new brands table
     await queryRunner.createForeignKey(
       'models',
       new TableForeignKey({

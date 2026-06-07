@@ -39,7 +39,7 @@
     {
       "_id": "fld_auth",
       "_type": "request_group",
-      "name": "🔐 Autenticação",
+      "name": "Autenticação",
       "description": "Endpoints de autenticação JWT",
       "parentId": "wrk_fleet"
     },
@@ -86,7 +86,7 @@
     {
       "_id": "fld_vehicles",
       "_type": "request_group",
-      "name": "🚙 Veículos",
+      "name": "Veículos",
       "description": "CRUD de veículos. GET /vehicles e GET /vehicles/:id utilizam cache Redis. Mutações invalidam o cache automaticamente.",
       "parentId": "wrk_fleet"
     },
@@ -193,7 +193,7 @@
     {
       "_id": "fld_models",
       "_type": "request_group",
-      "name": "🚗 Modelos",
+      "name": "Modelos",
       "description": "CRUD de modelos de veículos. Todas as rotas requerem Bearer token.",
       "parentId": "wrk_fleet"
     },
@@ -295,7 +295,7 @@
     {
       "_id": "fld_brands",
       "_type": "request_group",
-      "name": "🏷️ Marcas",
+      "name": "Marcas",
       "description": "CRUD de marcas. GET /brands/:id retorna a marca com seus modelos associados.",
       "parentId": "wrk_fleet"
     },
@@ -374,7 +374,7 @@
     {
       "_id": "fld_users",
       "_type": "request_group",
-      "name": "👤 Usuários",
+      "name": "Usuários",
       "description": "CRUD de usuários. Todas as rotas requerem Bearer token.",
       "parentId": "wrk_fleet"
     },

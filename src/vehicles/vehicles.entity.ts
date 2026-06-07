@@ -31,7 +31,7 @@ export class Vehicle {
   @Column()
   model_id: number;
 
-  @ManyToOne(() => Model, { nullable: false, onDelete: 'RESTRICT', eager: false })
+  @ManyToOne(() => Model, { nullable: false, onDelete: 'NO ACTION', eager: false })
   @JoinColumn({ name: 'model_id' })
   model: Model;
 

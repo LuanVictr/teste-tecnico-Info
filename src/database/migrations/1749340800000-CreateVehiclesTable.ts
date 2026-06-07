@@ -55,7 +55,7 @@ export class CreateVehiclesTable1749340800000 implements MigrationInterface {
         columnNames: ['model_id'],
         referencedTableName: 'models',
         referencedColumnNames: ['id'],
-        onDelete: 'RESTRICT',
+        onDelete: 'NO ACTION',
       }),
     );
     await queryRunner.createForeignKey(

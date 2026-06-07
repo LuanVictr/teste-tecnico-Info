@@ -17,7 +17,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PaginationDto } from '../shared/pagination/pagination.dto';
 
-@ApiTags('👤 Usuários')
+@ApiTags('Usuários')
 @ApiBearerAuth()
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')

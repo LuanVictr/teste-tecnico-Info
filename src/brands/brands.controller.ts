@@ -17,7 +17,7 @@ import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { ListBrandsDto } from './dto/list-brands.dto';
 
-@ApiTags('🏷️ Marcas')
+@ApiTags('Marcas')
 @ApiBearerAuth()
 @Controller('brands')
 export class BrandsController {

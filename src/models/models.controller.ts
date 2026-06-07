@@ -17,7 +17,7 @@ import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
 import { ListModelsDto } from './dto/list-models.dto';
 
-@ApiTags('🚗 Modelos')
+@ApiTags('Modelos')
 @ApiBearerAuth()
 @Controller('models')
 export class ModelsController {

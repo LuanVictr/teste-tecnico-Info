@@ -35,7 +35,6 @@ export class Brand {
   @DeleteDateColumn({ type: 'datetime2', nullable: true })
   deleted_at: Date;
 
-  // Populated after models are loaded
   @OneToMany('Model', 'brand')
   models: unknown[];
 }

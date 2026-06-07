@@ -1,10 +1,5 @@
 import type { Cache } from 'cache-manager';
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { FindManyOptions } from 'typeorm';
@@ -120,11 +115,9 @@ export class VehiclesService {
       ).store;
       const listKeys = await store.keys('vehicles:list*');
       if (listKeys.length) {
-        await Promise.all(listKeys.map(key => this.cacheManager.del(key)));
+        await Promise.all(listKeys.map((key) => this.cacheManager.del(key)));
       }
-    } catch {
-      // Cache invalidation failure must not block the primary operation
-    }
+    } catch {}
   }
 
   private handleUniqueViolation(error: unknown): void {
@@ -132,14 +125,14 @@ export class VehiclesService {
     if (mssqlError.number !== 2601 && mssqlError.number !== 2627) return;
 
     const message = mssqlError.message ?? '';
-    if (message.includes('UQ_vehicles_license_plate')) {
-      throw new ConflictException('Placa já cadastrada');
-    }
-    if (message.includes('UQ_vehicles_chassis')) {
-      throw new ConflictException('Chassi já cadastrado');
-    }
-    if (message.includes('UQ_vehicles_renavam')) {
-      throw new ConflictException('RENAVAM já cadastrado');
+    const conflicts: Record<string, string> = {
+      UQ_vehicles_license_plate: 'Placa já cadastrada',
+      UQ_vehicles_chassis: 'Chassi já cadastrado',
+      UQ_vehicles_renavam: 'RENAVAM já cadastrado',
+    };
+
+    for (const [constraint, errorMessage] of Object.entries(conflicts)) {
+      if (message.includes(constraint)) throw new ConflictException(errorMessage);
     }
     throw new ConflictException('Dado duplicado: verifique placa, chassi ou RENAVAM');
   }
