@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { User } from './users.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { paginate } from '../shared/pagination/paginate.helper';
 import { PaginationDto } from '../shared/pagination/pagination.dto';
 
@@ -61,7 +63,7 @@ export class UsersService implements OnModuleInit {
     return paginate(users, total, pagination.page, pagination.limit);
   }
 
-  async create(data: { nickname: string; name: string; email: string; password: string }) {
+  async create(data: CreateUserDto) {
     const existing = await this.userRepository.findOne({ where: { email: data.email } });
     if (existing) throw new ConflictException(`Email '${data.email}' já está em uso`);
 
@@ -71,10 +73,7 @@ export class UsersService implements OnModuleInit {
     return this.userRepository.save(user);
   }
 
-  async update(
-    id: number,
-    changes: Partial<{ nickname: string; name: string; email: string; password: string }>,
-  ) {
+  async update(id: number, changes: UpdateUserDto) {
     const user = await this.findById(id);
     const saltRounds = parseInt(this.config.get<string>('BCRYPT_SALT_ROUNDS', '10'), 10);
     if (changes.password) {
