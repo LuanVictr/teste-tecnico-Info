@@ -11,6 +11,7 @@ import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { ListVehiclesDto } from './dto/list-vehicles.dto';
 import { buildCacheKey } from '../shared/cache/cache-key.util';
 import { paginate } from '../shared/pagination/paginate.helper';
+import { EventPublisherService } from '../shared/messaging/event-publisher.service';
 
 @Injectable()
 export class VehiclesService {
@@ -19,6 +20,7 @@ export class VehiclesService {
     private readonly vehicleRepository: Repository<Vehicle>,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
+    private readonly eventPublisher: EventPublisherService,
   ) {}
 
   async create(data: CreateVehicleDto, userId: number) {
@@ -28,6 +30,7 @@ export class VehiclesService {
       const vehicle = this.vehicleRepository.create({ ...data, created_by: userId });
       const saved = await this.vehicleRepository.save(vehicle);
       await this.invalidateListCache();
+      this.eventPublisher.publish('vehicle', 'created', saved, userId);
       return saved;
     } catch (error) {
       this.handleUniqueViolation(error);
@@ -76,6 +79,7 @@ export class VehiclesService {
     try {
       const updated = await this.vehicleRepository.save(vehicle);
       await this.invalidateVehicleCache(id);
+      this.eventPublisher.publish('vehicle', 'updated', updated, _userId);
       return updated;
     } catch (error) {
       this.handleUniqueViolation(error);
@@ -83,10 +87,11 @@ export class VehiclesService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: number) {
     const vehicle = await this.loadById(id);
     await this.vehicleRepository.softRemove(vehicle);
     await this.invalidateVehicleCache(id);
+    this.eventPublisher.publish('vehicle', 'deleted', { id }, userId);
     return { message: 'Veículo removido com sucesso' };
   }
 

@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ModelsService } from './models.service';
 import { Model } from './models.entity';
+import { EventPublisherService } from '../shared/messaging/event-publisher.service';
 
 const mockVehicleRepo = { count: jest.fn() };
 
@@ -22,7 +23,11 @@ describe('ModelsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ModelsService, { provide: getRepositoryToken(Model), useValue: mockModelRepository }],
+      providers: [
+        ModelsService,
+        { provide: getRepositoryToken(Model), useValue: mockModelRepository },
+        { provide: EventPublisherService, useValue: { publish: jest.fn() } },
+      ],
     }).compile();
 
     service = module.get<ModelsService>(ModelsService);

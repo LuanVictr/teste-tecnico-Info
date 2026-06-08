@@ -6,12 +6,14 @@ import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { ListBrandsDto } from './dto/list-brands.dto';
 import { paginate } from '../shared/pagination/paginate.helper';
+import { EventPublisherService } from '../shared/messaging/event-publisher.service';
 
 @Injectable()
 export class BrandsService {
   constructor(
     @InjectRepository(Brand)
     private readonly brandRepository: Repository<Brand>,
+    private readonly eventPublisher: EventPublisherService,
   ) {}
 
   async create(data: CreateBrandDto, userId: number) {
@@ -19,7 +21,9 @@ export class BrandsService {
     if (existing) throw new ConflictException(`Marca '${data.name}' já cadastrada`);
 
     const brand = this.brandRepository.create({ ...data, created_by: userId });
-    return this.brandRepository.save(brand);
+    const saved = await this.brandRepository.save(brand);
+    this.eventPublisher.publish('brand', 'created', saved, userId);
+    return saved;
   }
 
   async findAll(filters: ListBrandsDto) {
@@ -49,7 +53,9 @@ export class BrandsService {
     }
 
     Object.assign(brand, changes);
-    return this.brandRepository.save(brand);
+    const updated = await this.brandRepository.save(brand);
+    this.eventPublisher.publish('brand', 'updated', updated, _userId);
+    return updated;
   }
 
   async remove(id: number) {
@@ -65,6 +71,7 @@ export class BrandsService {
     }
 
     await this.brandRepository.softRemove(brand);
+    this.eventPublisher.publish('brand', 'deleted', { id }, 0);
     return { message: 'Marca removida com sucesso' };
   }
 }

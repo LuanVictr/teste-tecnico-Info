@@ -4,6 +4,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { Vehicle } from './vehicles.entity';
+import { EventPublisherService } from '../shared/messaging/event-publisher.service';
 
 const mockModelRepository = { findOne: jest.fn() };
 
@@ -45,6 +46,7 @@ describe('VehiclesService', () => {
         VehiclesService,
         { provide: getRepositoryToken(Vehicle), useValue: mockVehicleRepository },
         { provide: CACHE_MANAGER, useValue: mockCacheManager },
+        { provide: EventPublisherService, useValue: { publish: jest.fn() } },
       ],
     }).compile();
 

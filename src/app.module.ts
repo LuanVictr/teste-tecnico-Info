@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { ModelsModule } from './models/models.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { BrandsModule } from './brands/brands.module';
+import { UsersModule } from './users/users.module';
 import { AppCacheModule } from './shared/cache/cache.module';
+import { MessagingModule } from './shared/messaging/messaging.module';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -29,8 +33,17 @@ import { AppCacheModule } from './shared/cache/cache.module';
         },
       }),
     }),
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.getOrThrow<string>('MONGODB_URI'),
+      }),
+    }),
     AppCacheModule,
+    MessagingModule,
+    AuditModule,
     AuthModule,
+    UsersModule,
     ModelsModule,
     VehiclesModule,
     BrandsModule,

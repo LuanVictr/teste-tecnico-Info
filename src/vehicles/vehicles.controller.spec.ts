@@ -128,7 +128,7 @@ describe('VehiclesController', () => {
     it('returns success message on deletion', async () => {
       mockService.remove.mockResolvedValue({ message: 'Veículo removido com sucesso' });
 
-      const result = await controller.remove(1);
+      const result = await controller.remove(1, { userId: 1, email: 'test@test.com' });
 
       expect((result as { message: string }).message).toBeDefined();
     });

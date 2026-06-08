@@ -7,19 +7,23 @@ import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
 import { ListModelsDto } from './dto/list-models.dto';
 import { paginate } from '../shared/pagination/paginate.helper';
+import { EventPublisherService } from '../shared/messaging/event-publisher.service';
 
 @Injectable()
 export class ModelsService {
   constructor(
     @InjectRepository(Model)
     private readonly modelRepository: Repository<Model>,
+    private readonly eventPublisher: EventPublisherService,
   ) {}
 
   async create(data: CreateModelDto, userId: number) {
     if (data.brand_id) await this.assertBrandExists(data.brand_id);
     await this.assertNameAvailable(data.name, data.brand_id);
     const model = this.modelRepository.create({ ...data, created_by: userId });
-    return this.modelRepository.save(model);
+    const saved = await this.modelRepository.save(model);
+    this.eventPublisher.publish('model', 'created', saved, userId);
+    return saved;
   }
 
   async findAll(filters: ListModelsDto) {
@@ -46,7 +50,9 @@ export class ModelsService {
       await this.assertNameAvailable(name, brandId, id);
     }
     Object.assign(model, changes);
-    return this.modelRepository.save(model);
+    const updated = await this.modelRepository.save(model);
+    this.eventPublisher.publish('model', 'updated', updated, _userId);
+    return updated;
   }
 
   async remove(id: number) {
@@ -62,6 +68,7 @@ export class ModelsService {
     }
 
     await this.modelRepository.softRemove(model);
+    this.eventPublisher.publish('model', 'deleted', { id }, 0);
     return { message: 'Modelo removido com sucesso' };
   }
 

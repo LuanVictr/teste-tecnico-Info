@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { BrandsService } from './brands.service';
 import { Brand } from './brands.entity';
+import { EventPublisherService } from '../shared/messaging/event-publisher.service';
 
 const mockModelRepository = { count: jest.fn() };
 
@@ -25,6 +26,7 @@ describe('BrandsService', () => {
       providers: [
         BrandsService,
         { provide: getRepositoryToken(Brand), useValue: mockBrandRepository },
+        { provide: EventPublisherService, useValue: { publish: jest.fn() } },
       ],
     }).compile();
 

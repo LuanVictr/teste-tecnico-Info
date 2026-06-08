@@ -77,7 +77,7 @@ export class VehiclesController {
   @ApiResponse({ status: 200, description: 'Veículo removido com sucesso' })
   @ApiResponse({ status: 404, description: 'Veículo não encontrado' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.vehiclesService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() currentUser: AuthUser) {
+    return this.vehiclesService.remove(id, currentUser.userId);
   }
 }

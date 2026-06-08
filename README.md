@@ -1,98 +1,289 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Aivacol Fleet Management — Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST para gerenciamento de frota de veículos, construída como teste técnico para a Aivacol.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Camada | Tecnologia |
+|--------|-----------|
+| Runtime | Node.js 18+ |
+| Framework | NestJS 11 |
+| ORM | TypeORM (migrations only, `synchronize: false`) |
+| Banco relacional | SQL Server 2022 |
+| Cache | Redis 7 + cache-manager |
+| Mensageria | RabbitMQ 3 (bônus) |
+| Auditoria | MongoDB 7 + Mongoose (bônus) |
+| Autenticação | JWT (`@nestjs/jwt`) |
+| Documentação | Swagger (`@nestjs/swagger`) em `/api/docs` |
+| Testes | Jest (TDD) |
+| Container | Docker + Docker Compose (multistage) |
 
-## Project setup
+---
 
-```bash
-$ npm install
-```
+## Pré-requisitos
 
-## Compile and run the project
+- Docker >= 24 e Docker Compose V2
+- Node.js 18+ (apenas para desenvolvimento local)
+
+---
+
+## Início rápido com Docker
 
 ```bash
-# development
-$ npm run start
+# 1. Clone o repositório
+git clone <repo-url>
+cd teste-tecnico-Info
 
-# watch mode
-$ npm run start:dev
+# 2. Copie e ajuste as variáveis de ambiente
+cp .env.example .env
+# Edite .env se quiser alterar senhas/portas
 
-# production mode
-$ npm run start:prod
+# 3. Suba todos os serviços
+docker compose up -d
+
+# 4. Acesse a API
+open http://localhost:3000/api/docs
 ```
 
-## Run tests
+A aplicação executa as migrations automaticamente na inicialização e cria o usuário seed `aivacol` caso ainda não exista.
+
+> **Nota**: O SQL Server pode demorar até 60 s na primeira inicialização. O Docker Compose aguarda o healthcheck antes de iniciar a aplicação.
+
+---
+
+## Desenvolvimento local
 
 ```bash
-# unit tests
-$ npm run test
+# Instale as dependências
+npm install
 
-# e2e tests
-$ npm run test:e2e
+# Suba apenas a infraestrutura (DB, Redis, RabbitMQ, MongoDB)
+docker compose up -d sqlserver redis rabbitmq mongodb
 
-# test coverage
-$ npm run test:cov
+# Configure o .env apontando para localhost
+cp .env.example .env
+# DB_HOST=localhost, REDIS_HOST=localhost etc.
+
+# Inicie em modo watch
+npm run start:dev
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Comandos úteis
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev       # watch mode
+npm run build           # compilar para dist/
+npm run test            # testes unitários
+npm run test:cov        # cobertura
+npm run lint            # ESLint
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## Variáveis de ambiente
 
-Check out a few resources that may come in handy when working with NestJS:
+Todas as variáveis estão documentadas em `.env.example`.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+| Variável | Descrição | Exemplo |
+|----------|-----------|---------|
+| `PORT` | Porta HTTP da aplicação | `3000` |
+| `JWT_SECRET` | Segredo de assinatura JWT | string aleatória longa |
+| `JWT_EXPIRATION` | TTL do token | `1d` |
+| `DB_HOST` | Host do SQL Server | `localhost` |
+| `DB_PORT` | Porta do SQL Server | `1433` |
+| `DB_USERNAME` | Usuário do banco | `sa` |
+| `DB_PASSWORD` | Senha do banco | — |
+| `DB_DATABASE` | Nome do banco | `fleet_management` |
+| `REDIS_HOST` | Host do Redis | `localhost` |
+| `REDIS_PORT` | Porta do Redis | `6379` |
+| `REDIS_PASSWORD` | Senha do Redis | — |
+| `CACHE_TTL_SECONDS` | TTL do cache de veículos | `60` |
+| `SEED_USER_EMAIL` | E-mail do usuário seed | `aivacol@aivacol.com` |
+| `SEED_USER_PASSWORD` | Senha do usuário seed | — |
+| `RABBITMQ_URL` | URL de conexão RabbitMQ | `amqp://guest:guest@localhost:5672` |
+| `MONGODB_URI` | URI do MongoDB | `mongodb://localhost:27017/fleet_audit` |
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Autenticação
 
-## Stay in touch
+Todas as rotas exigem `Authorization: Bearer <token>`, exceto `POST /auth/login`.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Login
 
-## License
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"aivacol@aivacol.com","password":"aivacol@123"}'
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Resposta:
+```json
+{ "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+```
+
+Use o token em todas as requisições seguintes:
+```bash
+-H "Authorization: Bearer <access_token>"
+```
+
+---
+
+## Endpoints
+
+A documentação interativa completa está em **`/api/docs`** (Swagger UI).
+
+### Auth
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/auth/login` | Login — retorna JWT |
+
+### Brands (marcas)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/brands` | Criar marca |
+| GET | `/brands` | Listar (paginado) |
+| GET | `/brands/:id` | Buscar por ID (inclui modelos) |
+| PATCH | `/brands/:id` | Atualizar |
+| DELETE | `/brands/:id` | Remover (soft delete) |
+
+### Models (modelos de veículo)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/models` | Criar modelo |
+| GET | `/models` | Listar (paginado) |
+| GET | `/models/:id` | Buscar por ID |
+| PATCH | `/models/:id` | Atualizar |
+| DELETE | `/models/:id` | Remover (soft delete) |
+
+### Vehicles (veículos)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/vehicles` | Registrar veículo |
+| GET | `/vehicles` | Listar (paginado, com filtros + cache Redis) |
+| GET | `/vehicles/:id` | Buscar por ID (cache Redis) |
+| PATCH | `/vehicles/:id` | Atualizar (invalida cache) |
+| DELETE | `/vehicles/:id` | Remover (soft delete, invalida cache) |
+
+**Filtros disponíveis em `GET /vehicles`**: `page`, `limit`, `modelId`, `year`
+
+### Users (usuários)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/users` | Criar usuário |
+| GET | `/users` | Listar (paginado) |
+| GET | `/users/:id` | Buscar por ID |
+| PATCH | `/users/:id` | Atualizar |
+| DELETE | `/users/:id` | Remover (soft delete) |
+
+---
+
+## Cache Redis
+
+- Aplicado em `GET /vehicles` e `GET /vehicles/:id`
+- TTL configurável via `CACHE_TTL_SECONDS`
+- Invalidado automaticamente em `POST`, `PATCH` e `DELETE /vehicles`
+- Chaves: `vehicles:list:*` e `vehicles:detail:{id}`
+
+---
+
+## Mensageria e Auditoria (bônus)
+
+Cada mutação nos recursos publica um evento no RabbitMQ:
+
+- **Exchange**: `fleet.events` (topic)
+- **Routing key**: `{entity}.{action}` — ex: `vehicle.created`, `model.updated`
+- **Payload**: `{ entity, action, payload, userId, timestamp }`
+
+O `AuditConsumer` consome a fila `audit_queue` (bound com wildcard `#`) e persiste cada evento no MongoDB, coleção `audit_logs`.
+
+> A falha no RabbitMQ **não bloqueia** as operações principais — o publish é fire-and-forget.
+
+**RabbitMQ Management UI**: `http://localhost:15672` (user: `guest`, pass: `guest`)
+
+---
+
+## Seed de veículos
+
+O arquivo `seed_vehicles.json` contém 22 veículos de exemplo (placas nos formatos antigo e Mercosul) para importação manual ou uso em testes.
+
+Para cadastrá-los, autentique-se e faça um `POST /vehicles` para cada entrada do arquivo, ou use o script abaixo:
+
+```bash
+TOKEN="<seu_token>"
+jq -c '.[]' seed_vehicles.json | while read vehicle; do
+  curl -s -X POST http://localhost:3000/vehicles \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$vehicle"
+done
+```
+
+> Certifique-se de criar previamente os modelos com IDs 1, 2 e 3 (`POST /models`).
+
+---
+
+## Testes
+
+```bash
+# Todos os testes unitários
+npm run test
+
+# Com cobertura
+npm run test:cov
+
+# Modo watch
+npm run test:watch
+```
+
+Cobertura de: serviços, validações de negócio, guards JWT, publisher de eventos, consumer de auditoria.
+
+---
+
+## Insomnia
+
+Importe `insomnia.json` na raiz do projeto no Insomnia para ter todos os endpoints pré-configurados com variáveis de ambiente.
+
+---
+
+## Arquitetura
+
+```
+Client ──HTTP :3000──► NestJS App
+                         ├── JwtAuthGuard (global, APP_GUARD)
+                         ├── ValidationPipe (global)
+                         ├── AuthModule       → POST /auth/login
+                         ├── UsersModule      → CRUD /users
+                         ├── BrandsModule     → CRUD /brands
+                         ├── ModelsModule     → CRUD /models
+                         ├── VehiclesModule   → CRUD /vehicles + Redis cache
+                         ├── MessagingModule  → EventPublisherService (amqplib)
+                         └── AuditModule      → AuditConsumer + MongoDB
+                       │
+              ┌────────┼──────────────────────────────┐
+              │        │                              │
+           SQL Server  Redis                     RabbitMQ ──► MongoDB
+           (TypeORM)  (cache-manager)            fleet.events   audit_logs
+```
+
+O diagrama completo do sistema está em `docs/system-design.excalidraw` (importar em excalidraw.com).
+
+---
+
+## Deploy em VPS (Hostinger)
+
+```bash
+# Na VPS, após clonar o repositório:
+cp .env.example .env
+# Configure senhas seguras no .env
+
+docker compose up -d --build
+```
+
+Recomendações para produção:
+- Use `NODE_ENV=production`
+- Configure `JWT_SECRET` com string aleatória de 64+ caracteres
+- Use senhas fortes para SQL Server, Redis e RabbitMQ
+- Configure um reverse proxy (nginx/Caddy) na frente da porta 3000
