@@ -159,14 +159,17 @@ curl http://localhost:3000/vehicles \
 
 ## Frontend (bônus visual)
 
-Um painel frontend standalone está em `frontend/index.html`. Abra diretamente no browser — nenhuma instalação necessária.
+O painel frontend sobe automaticamente com o `make start` / `./start.sh`, servido pelo nginx na porta **8080**.
 
-```bash
-# Abrir no browser padrão (Linux)
-xdg-open frontend/index.html
-
-# Ou simplesmente arraste o arquivo para o browser
 ```
+http://localhost:8080
+```
+
+**Credenciais de acesso:**
+| Campo | Valor |
+|-------|-------|
+| Usuário | `aivacol` |
+| Senha | qualquer senha |
 
 **Funcionalidades do painel:**
 - Login com seed user (`aivacol` / qualquer senha)
