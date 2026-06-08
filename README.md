@@ -168,16 +168,17 @@ http://localhost:8080
 **Credenciais de acesso:**
 | Campo | Valor |
 |-------|-------|
-| Usuário | `aivacol` |
-| Senha | qualquer senha |
+| E-mail | `aivacol@aivacol.com` |
+| Senha | `aivacol@123` |
 
 **Funcionalidades do painel:**
-- Login com seed user (`aivacol` / qualquer senha)
-- Dashboard com KPIs animados, gráfico de frota por modelo e status do sistema
-- CRUD completo de Veículos, Modelos e Marcas (com modais e validação)
+- Login real via `POST /auth/login` — JWT armazenado no browser
+- Dashboard com KPIs animados (dados reais da API), gráfico de frota por modelo e status do sistema
+- CRUD completo de Veículos, Modelos e Marcas (modais com validação, paginação real)
 - Tabela de Usuários e listagem de todos os Endpoints da API
+- Toasts de feedback para todas as operações
 
-> O frontend é uma demo visual — os dados são locais (mock). A API real roda em `http://localhost:3000`.
+> O frontend é construído com **React + Vite** e consome a API em `http://localhost:3000`. Todos os dados são reais — sem mock.
 
 ---
 

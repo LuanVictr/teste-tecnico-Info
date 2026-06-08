@@ -96,11 +96,10 @@ services:
 
   frontend:
     container_name: aivacol-fleet-frontend
-    image: nginx:alpine
+    build:
+      context: ./frontend
     ports:
       - "8080:80"
-    volumes:
-      - ./frontend:/usr/share/nginx/html:ro
     restart: unless-stopped
 
   mongodb:
