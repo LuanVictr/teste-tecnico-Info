@@ -92,6 +92,8 @@ chmod +x start.sh
 2. Faz o build da imagem Docker e sobe os 5 serviços
 3. Imprime as URLs quando tudo estiver pronto
 
+> **Sobre o `.env.example`:** ele contém credenciais reais de demonstração (senhas, JWT secret, etc.) propositalmente commitadas no repositório. Isso é **intencional para este teste técnico** — o objetivo é que qualquer avaliador rode o projeto com zero configuração manual. Em um projeto de produção, o `.env.example` conteria apenas placeholders (`DB_PASSWORD=your-password-here`) e o `.env` real nunca seria versionado.
+
 > **Primeira execução:** o SQL Server precisa de ~60 segundos para inicializar. A aplicação só sobe após o healthcheck do banco passar — você verá as URLs quando estiver tudo pronto.
 
 ```
@@ -293,7 +295,9 @@ Cobertura: auth, users, brands, models, vehicles, cache, pagination, EventPublis
 
 ## Variáveis de ambiente
 
-O `.env.example` já contém todos os valores necessários para rodar localmente — basta copiá-lo (o script faz isso automaticamente).
+O `.env.example` já contém **todos os valores preenchidos** (incluindo senhas e secrets) para rodar localmente sem nenhuma configuração adicional. O script copia esse arquivo automaticamente para `.env` na primeira execução.
+
+> ⚠️ **Nota de segurança:** credenciais no `.env.example` são **intencionais neste teste técnico** para que qualquer avaliador rode o projeto com um único comando. Em um projeto real, o `.env.example` teria apenas placeholders e o `.env` nunca seria commitado.
 
 | Variável | Descrição | Padrão |
 |----------|-----------|--------|
