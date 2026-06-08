@@ -157,6 +157,27 @@ curl http://localhost:3000/vehicles \
 
 ---
 
+## Frontend (bônus visual)
+
+Um painel frontend standalone está em `frontend/index.html`. Abra diretamente no browser — nenhuma instalação necessária.
+
+```bash
+# Abrir no browser padrão (Linux)
+xdg-open frontend/index.html
+
+# Ou simplesmente arraste o arquivo para o browser
+```
+
+**Funcionalidades do painel:**
+- Login com seed user (`aivacol` / qualquer senha)
+- Dashboard com KPIs animados, gráfico de frota por modelo e status do sistema
+- CRUD completo de Veículos, Modelos e Marcas (com modais e validação)
+- Tabela de Usuários e listagem de todos os Endpoints da API
+
+> O frontend é uma demo visual — os dados são locais (mock). A API real roda em `http://localhost:3000`.
+
+---
+
 ## Endpoints
 
 A documentação interativa completa (com exemplos e schemas) está no **Swagger UI**: `http://localhost:3000/api/docs`

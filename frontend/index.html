@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aivacol — Plataforma de Gestão de Frota</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+:root{
+  --y:#F5BB00;--yd:#C99600;--ym:rgba(245,187,0,.12);--yl:#FFFBEB;
+  --og:#E8701E;--ogm:rgba(232,112,30,.12);
+  --sb:#111114;--sb2:#1A1A1E;--sb3:#232328;
+  --bg:#F4F4F6;--wh:#FFFFFF;
+  --tx:#111114;--t2:#6B7280;--t3:#9CA3AF;
+  --bd:#E5E7EB;--bd2:#F3F4F6;
+  --ok:#16A34A;--okb:#DCFCE7;
+  --wn:#CA8A04;--wnb:#FEF9C3;
+  --er:#DC2626;--erb:#FEE2E2;
+  --r:10px;--sh:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shm:0 4px 16px rgba(0,0,0,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body,#root{height:100%;}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:var(--tx);background:var(--bg);}
+button{font-family:inherit;cursor:pointer;border:0;outline:0;transition:all .15s;}
+input,select,textarea{font-family:inherit;outline:0;}
+svg{display:block;flex-shrink:0;}
+
+/* ── LOGIN ────────────────────────────────────────────── */
+.login-wrap{height:100%;display:flex;align-items:stretch;}
+.login-left{flex:1;background:var(--sb);display:flex;flex-direction:column;justify-content:space-between;padding:48px;position:relative;overflow:hidden;}
+.login-left::before{content:'';position:absolute;width:480px;height:480px;border-radius:50%;background:rgba(245,187,0,.06);top:-120px;left:-120px;}
+.login-left::after{content:'';position:absolute;width:320px;height:320px;border-radius:50%;background:rgba(245,187,0,.04);bottom:-80px;right:-80px;}
+.ll-logo{display:flex;align-items:center;gap:12px;z-index:1;}
+.ll-badge{width:40px;height:40px;border-radius:10px;background:var(--y);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:var(--sb);}
+.ll-brand{font-weight:800;font-size:22px;color:#fff;letter-spacing:-.3px;}
+.ll-brand span{color:var(--y);}
+.ll-hero{z-index:1;}
+.ll-hero h1{font-size:36px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-.5px;margin-bottom:16px;}
+.ll-hero h1 em{font-style:normal;color:var(--y);}
+.ll-hero p{color:var(--t3);font-size:15px;line-height:1.6;max-width:340px;}
+.ll-chips{display:flex;flex-wrap:wrap;gap:8px;z-index:1;}
+.ll-chip{padding:6px 12px;border-radius:20px;background:var(--sb3);border:1px solid var(--sb3);color:var(--t3);font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.ll-chip span{width:6px;height:6px;border-radius:50%;background:var(--ok);}
+.login-right{width:460px;display:flex;align-items:center;justify-content:center;padding:48px;}
+.login-card{width:100%;}
+.login-card h2{font-size:24px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px;}
+.login-card p{color:var(--t2);font-size:14px;margin-bottom:32px;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--t2);margin-bottom:6px;}
+.form-group input{width:100%;padding:11px 14px;border:1.5px solid var(--bd);border-radius:8px;font-size:14px;color:var(--tx);background:var(--wh);transition:border-color .15s;}
+.form-group input:focus{border-color:var(--y);}
+.btn-primary{width:100%;padding:12px;border-radius:8px;background:var(--y);color:var(--sb);font-weight:700;font-size:14px;letter-spacing:.1px;}
+.btn-primary:hover{background:var(--yd);}
+.login-hint{margin-top:20px;padding:12px 14px;background:var(--bd2);border-radius:8px;font-size:12.5px;color:var(--t2);}
+.login-hint strong{color:var(--tx);}
+.login-error{color:var(--er);font-size:13px;margin-top:8px;display:flex;align-items:center;gap:6px;}
+
+/* ── APP LAYOUT ────────────────────────────────────────── */
+.app{display:flex;height:100%;overflow:hidden;}
+.sidebar{width:220px;flex-shrink:0;background:var(--sb);display:flex;flex-direction:column;height:100%;overflow-y:auto;}
+.sb-logo{padding:20px 16px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.06);}
+.sb-badge{width:34px;height:34px;border-radius:8px;background:var(--y);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:var(--sb);}
+.sb-name{font-weight:800;font-size:15px;color:#fff;letter-spacing:-.2px;}
+.sb-name small{display:block;font-size:10px;font-weight:500;color:var(--t3);letter-spacing:.3px;text-transform:uppercase;}
+.sb-nav{flex:1;padding:12px 8px;}
+.sb-section{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;padding:8px 10px 4px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;color:var(--t3);font-size:13.5px;font-weight:500;transition:all .15s;margin-bottom:1px;position:relative;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.sb-item.active{background:var(--ym);color:var(--y);font-weight:600;}
+.sb-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--y);border-radius:0 3px 3px 0;}
+.sb-foot{padding:12px 8px;border-top:1px solid rgba(255,255,255,.06);}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:var(--ym);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--y);}
+.sb-uname{font-size:13px;font-weight:600;color:#fff;}
+.sb-urole{font-size:11px;color:var(--t3);}
+.sb-logout{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--t3);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-top:4px;}
+.sb-logout:hover{background:rgba(255,255,255,.06);color:var(--er);}
+
+/* ── MAIN ──────────────────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{height:58px;background:var(--wh);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;}
+.tb-title{font-size:17px;font-weight:700;letter-spacing:-.2px;}
+.tb-right{display:flex;align-items:center;gap:12px;}
+.tb-tag{padding:4px 10px;border-radius:20px;background:var(--ym);color:var(--yd);font-size:11.5px;font-weight:700;letter-spacing:.2px;}
+.tb-bell{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--bd);background:transparent;display:flex;align-items:center;justify-content:center;color:var(--t2);}
+.tb-bell:hover{background:var(--bd2);}
+.content{flex:1;overflow-y:auto;padding:24px;}
+
+/* ── DASHBOARD ─────────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.kpi-card{background:var(--wh);border-radius:var(--r);padding:20px;box-shadow:var(--sh);}
+.kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.kpi-icon.y{background:var(--ym);color:var(--yd);}
+.kpi-icon.og{background:var(--ogm);color:var(--og);}
+.kpi-icon.ok{background:var(--okb);color:var(--ok);}
+.kpi-icon.bd{background:var(--bd2);color:var(--t2);}
+.kpi-delta{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
+.kpi-delta.up{background:var(--okb);color:var(--ok);}
+.kpi-num{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1;}
+.kpi-label{font-size:12.5px;color:var(--t2);margin-top:4px;font-weight:500;}
+
+.dash-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;}
+.card{background:var(--wh);border-radius:var(--r);padding:20px;box-shadow:var(--sh);}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-hd h3{font-size:14px;font-weight:700;}
+.card-hd a{font-size:12.5px;color:var(--y);font-weight:600;cursor:pointer;}
+.card-hd a:hover{color:var(--yd);}
+
+.act-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd2);}
+.act-item:last-child{border-bottom:0;padding-bottom:0;}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.act-info{flex:1;}
+.act-info strong{font-size:13px;font-weight:600;display:block;}
+.act-info span{font-size:12px;color:var(--t2);}
+.act-time{font-size:11.5px;color:var(--t3);}
+
+.sys-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd2);}
+.sys-item:last-child{border-bottom:0;padding-bottom:0;}
+.sys-left{display:flex;align-items:center;gap:10px;}
+.sys-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.sys-label{font-size:13px;font-weight:600;}
+.sys-sub{font-size:11.5px;color:var(--t3);}
+.sys-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);}
+.sys-badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.sys-badge.ok{background:var(--okb);color:var(--ok);}
+.sys-badge.wn{background:var(--wnb);color:var(--wn);}
+
+/* ── TABLE PAGE ─────────────────────────────────────────── */
+.page-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.page-hd h2{font-size:20px;font-weight:800;letter-spacing:-.3px;}
+.btn-add{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;background:var(--y);color:var(--sb);font-weight:700;font-size:13.5px;}
+.btn-add:hover{background:var(--yd);}
+.filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:1;min-width:180px;max-width:300px;}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t3);}
+.search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1.5px solid var(--bd);border-radius:8px;font-size:13.5px;background:var(--wh);color:var(--tx);}
+.search-wrap input:focus{border-color:var(--y);}
+.filter-sel{padding:9px 12px;border:1.5px solid var(--bd);border-radius:8px;font-size:13.5px;background:var(--wh);color:var(--tx);cursor:pointer;}
+.filter-sel:focus{border-color:var(--y);}
+.tbl-wrap{background:var(--wh);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;}
+.tbl-wrap table{width:100%;border-collapse:collapse;}
+.tbl-wrap thead tr{background:var(--bd2);}
+.tbl-wrap th{padding:10px 14px;text-align:left;font-size:11.5px;font-weight:700;color:var(--t2);letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;cursor:pointer;user-select:none;}
+.tbl-wrap th:hover{color:var(--tx);}
+.tbl-wrap td{padding:12px 14px;font-size:13.5px;border-bottom:1px solid var(--bd2);vertical-align:middle;}
+.tbl-wrap tr:last-child td{border-bottom:0;}
+.tbl-wrap tbody tr:hover{background:var(--yl);}
+.mono{font-family:'SFMono-Regular',Consolas,monospace;font-size:12.5px;}
+.tbl-actions{display:flex;gap:6px;}
+.btn-icon{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;}
+.btn-edit{background:var(--ogm);color:var(--og);}
+.btn-edit:hover{background:var(--og);color:#fff;}
+.btn-del{background:var(--erb);color:var(--er);}
+.btn-del:hover{background:var(--er);color:#fff;}
+.pager{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-top:1px solid var(--bd2);}
+.pager span{font-size:13px;color:var(--t2);}
+.pager-btns{display:flex;gap:6px;}
+.pager-btns button{padding:6px 14px;border-radius:6px;border:1.5px solid var(--bd);background:var(--wh);font-size:13px;font-weight:600;color:var(--tx);}
+.pager-btns button:hover:not(:disabled){background:var(--bd2);}
+.pager-btns button:disabled{opacity:.4;cursor:default;}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
+.badge.active{background:var(--okb);color:var(--ok);}
+.badge.maintenance{background:var(--wnb);color:var(--wn);}
+.badge.inactive{background:var(--bd2);color:var(--t2);}
+.empty-row td{text-align:center;padding:40px;color:var(--t3);font-size:14px;}
+
+/* ── MODAL ─────────────────────────────────────────────── */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(4px);}
+.modal-box{background:var(--wh);border-radius:14px;width:100%;max-width:480px;box-shadow:var(--shm);animation:mIn .18s ease;}
+@keyframes mIn{from{transform:translateY(10px) scale(.98);opacity:0;}to{transform:none;opacity:1;}}
+.modal-hd{padding:20px 24px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.modal-hd h3{font-size:16px;font-weight:700;}
+.modal-close{width:30px;height:30px;border-radius:7px;background:var(--bd2);display:flex;align-items:center;justify-content:center;color:var(--t2);}
+.modal-close:hover{background:var(--bd);color:var(--tx);}
+.modal-body{padding:20px 24px;}
+.modal-ft{padding:16px 24px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:10px;}
+.m-fg{margin-bottom:14px;}
+.m-fg label{display:block;font-size:12.5px;font-weight:600;color:var(--t2);margin-bottom:5px;}
+.m-fg input,.m-fg select{width:100%;padding:9px 12px;border:1.5px solid var(--bd);border-radius:8px;font-size:14px;color:var(--tx);background:var(--wh);}
+.m-fg input:focus,.m-fg select:focus{border-color:var(--y);}
+.m-fg .err{font-size:12px;color:var(--er);margin-top:4px;}
+.m-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.btn-cancel{padding:9px 18px;border-radius:8px;border:1.5px solid var(--bd);background:transparent;font-size:14px;font-weight:600;color:var(--tx);}
+.btn-cancel:hover{background:var(--bd2);}
+.btn-save{padding:9px 22px;border-radius:8px;background:var(--y);color:var(--sb);font-size:14px;font-weight:700;}
+.btn-save:hover{background:var(--yd);}
+
+/* ── TOAST ─────────────────────────────────────────────── */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px;}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;box-shadow:var(--shm);animation:tIn .2s ease;font-size:14px;font-weight:600;min-width:240px;max-width:320px;}
+@keyframes tIn{from{transform:translateX(20px);opacity:0;}to{transform:none;opacity:1;}}
+.toast.ok{background:#ECFDF5;border:1.5px solid #A7F3D0;color:#065F46;}
+.toast.er{background:#FEF2F2;border:1.5px solid #FECACA;color:#991B1B;}
+.toast.info{background:#EFF6FF;border:1.5px solid #BFDBFE;color:#1E40AF;}
+
+/* ── MISC ──────────────────────────────────────────────── */
+.breadcrumb{font-size:12.5px;color:var(--t3);font-weight:500;display:flex;align-items:center;gap:6px;}
+.breadcrumb b{color:var(--tx);}
+.tag-nest{padding:3px 8px;border-radius:6px;background:var(--sb);color:var(--y);font-size:11px;font-weight:700;font-family:'SFMono-Regular',monospace;}
+.delete-confirm{padding:16px;background:var(--erb);border-radius:8px;margin-bottom:4px;}
+.delete-confirm p{font-size:13.5px;color:var(--er);font-weight:500;}
+.delete-confirm strong{font-weight:700;}
+.jwt-bar{background:var(--sb2);border-radius:8px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.jwt-bar span{font-family:'SFMono-Regular',monospace;font-size:11px;color:var(--t3);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.jwt-bar strong{font-size:11px;color:var(--y);font-weight:700;flex-shrink:0;}
+.chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.chart-bar-label{font-size:12px;color:var(--t2);width:80px;text-align:right;flex-shrink:0;}
+.chart-bar-track{flex:1;height:8px;background:var(--bd2);border-radius:4px;overflow:hidden;}
+.chart-bar-fill{height:100%;border-radius:4px;background:var(--y);transition:width .8s ease;}
+.chart-bar-val{font-size:12px;font-weight:700;color:var(--tx);width:30px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ── DATA ─────────────────────────────────────────── */
+const BRANDS_INIT = [
+  {id:1,name:'Toyota',created_at:'2024-01-10',created_by:'aivacol'},
+  {id:2,name:'Honda',created_at:'2024-01-10',created_by:'aivacol'},
+  {id:3,name:'Volkswagen',created_at:'2024-01-11',created_by:'aivacol'},
+  {id:4,name:'Chevrolet',created_at:'2024-01-11',created_by:'aivacol'},
+  {id:5,name:'Ford',created_at:'2024-01-12',created_by:'aivacol'},
+  {id:6,name:'Fiat',created_at:'2024-01-12',created_by:'aivacol'},
+];
+const MODELS_INIT = [
+  {id:1,name:'Corolla',brand_id:1,created_at:'2024-01-15',created_by:'aivacol'},
+  {id:2,name:'Hilux',brand_id:1,created_at:'2024-01-15',created_by:'aivacol'},
+  {id:3,name:'Civic',brand_id:2,created_at:'2024-01-16',created_by:'aivacol'},
+  {id:4,name:'HR-V',brand_id:2,created_at:'2024-01-16',created_by:'aivacol'},
+  {id:5,name:'Gol',brand_id:3,created_at:'2024-01-17',created_by:'aivacol'},
+  {id:6,name:'Tiguan',brand_id:3,created_at:'2024-01-17',created_by:'aivacol'},
+  {id:7,name:'Onix',brand_id:4,created_at:'2024-01-18',created_by:'aivacol'},
+  {id:8,name:'S10',brand_id:4,created_at:'2024-01-18',created_by:'aivacol'},
+  {id:9,name:'Ka',brand_id:5,created_at:'2024-01-19',created_by:'aivacol'},
+  {id:10,name:'Ranger',brand_id:5,created_at:'2024-01-19',created_by:'aivacol'},
+  {id:11,name:'Strada',brand_id:6,created_at:'2024-01-20',created_by:'aivacol'},
+  {id:12,name:'Toro',brand_id:6,created_at:'2024-01-20',created_by:'aivacol'},
+];
+const VEHICLES_INIT = [
+  {id:1,license_plate:'ABC1D23',chassis:'9BWZZZ377VT004251',renavam:'12345678901',year:2022,model_id:1,status:'active',created_at:'2024-02-01',created_by:'aivacol'},
+  {id:2,license_plate:'DEF4G56',chassis:'9BWZZZ377VT004252',renavam:'23456789012',year:2021,model_id:2,status:'active',created_at:'2024-02-02',created_by:'aivacol'},
+  {id:3,license_plate:'GHI7J89',chassis:'9BWZZZ377VT004253',renavam:'34567890123',year:2023,model_id:3,status:'maintenance',created_at:'2024-02-03',created_by:'aivacol'},
+  {id:4,license_plate:'JKL0M12',chassis:'9BWZZZ377VT004254',renavam:'45678901234',year:2020,model_id:7,status:'active',created_at:'2024-02-04',created_by:'aivacol'},
+  {id:5,license_plate:'MNO3P45',chassis:'9BWZZZ377VT004255',renavam:'56789012345',year:2019,model_id:5,status:'active',created_at:'2024-02-05',created_by:'aivacol'},
+  {id:6,license_plate:'PQR6S78',chassis:'9BWZZZ377VT004256',renavam:'67890123456',year:2022,model_id:10,status:'inactive',created_at:'2024-02-06',created_by:'aivacol'},
+  {id:7,license_plate:'STU9V01',chassis:'9BWZZZ377VT004257',renavam:'78901234567',year:2021,model_id:4,status:'active',created_at:'2024-02-07',created_by:'aivacol'},
+  {id:8,license_plate:'VWX2Y34',chassis:'9BWZZZ377VT004258',renavam:'89012345678',year:2023,model_id:11,status:'active',created_at:'2024-02-08',created_by:'aivacol'},
+  {id:9,license_plate:'YZA5B67',chassis:'9BWZZZ377VT004259',renavam:'90123456789',year:2020,model_id:6,status:'maintenance',created_at:'2024-02-09',created_by:'aivacol'},
+  {id:10,license_plate:'BCD8E90',chassis:'9BWZZZ377VT004260',renavam:'01234567890',year:2018,model_id:8,status:'active',created_at:'2024-02-10',created_by:'aivacol'},
+  {id:11,license_plate:'EFG1H23',chassis:'9BWZZZ377VT004261',renavam:'12345678902',year:2022,model_id:12,status:'active',created_at:'2024-02-11',created_by:'aivacol'},
+  {id:12,license_plate:'HIJ4K56',chassis:'9BWZZZ377VT004262',renavam:'23456789013',year:2021,model_id:9,status:'active',created_at:'2024-02-12',created_by:'aivacol'},
+  {id:13,license_plate:'KLM7N89',chassis:'9BWZZZ377VT004263',renavam:'34567890124',year:2019,model_id:1,status:'inactive',created_at:'2024-02-13',created_by:'aivacol'},
+  {id:14,license_plate:'NOP0Q12',chassis:'9BWZZZ377VT004264',renavam:'45678901235',year:2023,model_id:3,status:'active',created_at:'2024-02-14',created_by:'aivacol'},
+  {id:15,license_plate:'QRS3T45',chassis:'9BWZZZ377VT004265',renavam:'56789012346',year:2020,model_id:7,status:'active',created_at:'2024-02-15',created_by:'aivacol'},
+];
+const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhaXZhY29sIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ4OTk5NjAwfQ.xK8mR3vZ9...';
+const fmtDate = d => new Date(d).toLocaleDateString('pt-BR');
+const genId = arr => (arr.length ? Math.max(...arr.map(x=>x.id))+1 : 1);
+const statusLabel = {active:'Ativo',maintenance:'Manutenção',inactive:'Inativo'};
+
+/* ── ICONS ──────────────────────────────────────── */
+const Ico = ({n,s=16,c=''}) => {
+  const P = {
+    home:<><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>,
+    truck:<><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></>,
+    tag:<><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></>,
+    building:<><rect x="3" y="9" width="18" height="13"/><path d="M8 22V12h8v10M3 9V6l9-3 9 3v3"/><path d="M10 22V17h4v5"/></>,
+    users:<><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></>,
+    plus:<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+    pencil:<><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></>,
+    trash:<><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></>,
+    search:<><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
+    bell:<><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></>,
+    logout:<><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></>,
+    check:<><polyline points="20 6 9 17 4 12"/></>,
+    x:<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+    server:<><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></>,
+    zap:<><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></>,
+    db:<><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></>,
+    shield:<><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></>,
+  };
+  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={c}>{P[n]}</svg>;
+};
+
+/* ── TOAST ──────────────────────────────────────── */
+function ToastStack({toasts}){
+  return <div className="toast-wrap">{toasts.map(t=>(
+    <div key={t.id} className={`toast ${t.type}`}>
+      <Ico n={t.type==='ok'?'check':t.type==='er'?'x':'bell'} s={14}/>
+      {t.msg}
+    </div>
+  ))}</div>;
+}
+
+/* ── MODAL ──────────────────────────────────────── */
+function Modal({open,title,onClose,onSave,children,saveLabel='Salvar'}){
+  if(!open) return null;
+  return <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&onClose()}>
+    <div className="modal-box">
+      <div className="modal-hd">
+        <h3>{title}</h3>
+        <button className="modal-close" onClick={onClose}><Ico n="x" s={14}/></button>
+      </div>
+      <div className="modal-body">{children}</div>
+      <div className="modal-ft">
+        <button className="btn-cancel" onClick={onClose}>Cancelar</button>
+        <button className="btn-save" onClick={onSave}>{saveLabel}</button>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── BADGE ──────────────────────────────────────── */
+const Badge = ({s}) => <span className={`badge ${s}`}>{statusLabel[s]||s}</span>;
+
+/* ── LOGIN ──────────────────────────────────────── */
+function Login({onLogin}){
+  const [email,setEmail]=useState('');
+  const [pass,setPass]=useState('');
+  const [err,setErr]=useState('');
+  const [loading,setLoading]=useState(false);
+  const submit = e => {
+    e.preventDefault();
+    setErr('');
+    if(!email||!pass){setErr('Preencha todos os campos.');return;}
+    setLoading(true);
+    setTimeout(()=>{
+      if(email==='aivacol'||email.includes('aivacol')){
+        onLogin('aivacol');
+      } else {
+        setErr('Credenciais inválidas. Use o usuário padrão.');
+        setLoading(false);
+      }
+    },900);
+  };
+  return <div className="login-wrap">
+    <div className="login-left">
+      <div className="ll-logo">
+        <div className="ll-badge">A</div>
+        <div className="ll-brand">Aivacol</div>
+      </div>
+      <div className="ll-hero">
+        <h1>Gestão de Frota<br/><em>inteligente.</em></h1>
+        <p>Plataforma completa para controle de veículos, modelos e marcas com arquitetura limpa, segurança robusta e cache Redis.</p>
+      </div>
+      <div className="ll-chips">
+        <div className="ll-chip"><span></span>NestJS 10+</div>
+        <div className="ll-chip"><span></span>JWT Auth</div>
+        <div className="ll-chip"><span></span>Redis Cache</div>
+        <div className="ll-chip"><span></span>SQL Server</div>
+        <div className="ll-chip"><span></span>TypeORM</div>
+        <div className="ll-chip"><span></span>Jest Tests</div>
+      </div>
+    </div>
+    <div className="login-right">
+      <div className="login-card">
+        <h2>Entrar na plataforma</h2>
+        <p>Use as credenciais do seed para acessar.</p>
+        <form onSubmit={submit}>
+          <div className="form-group">
+            <label>Usuário / E-mail</label>
+            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="aivacol" autoFocus/>
+          </div>
+          <div className="form-group">
+            <label>Senha</label>
+            <input type="password" value={pass} onChange={e=>setPass(e.target.value)} placeholder="••••••••"/>
+          </div>
+          {err&&<p className="login-error"><Ico n="x" s={13}/>  {err}</p>}
+          <br/>
+          <button className="btn-primary" type="submit">{loading?'Autenticando…':'Entrar'}</button>
+        </form>
+        <div className="login-hint">
+          <strong>Seed padrão:</strong> usuário <strong>aivacol</strong> — qualquer senha
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────── */
+const NAV = [
+  {id:'dashboard',label:'Dashboard',icon:'home'},
+  {id:'vehicles',label:'Veículos',icon:'truck'},
+  {id:'models',label:'Modelos',icon:'tag'},
+  {id:'brands',label:'Marcas',icon:'building'},
+  {id:'users',label:'Usuários',icon:'users'},
+];
+function Sidebar({page,setPage,onLogout}){
+  return <div className="sidebar">
+    <div className="sb-logo">
+      <div className="sb-badge">A</div>
+      <div>
+        <div className="sb-name">Aivacol<small>Gestão de Frota</small></div>
+      </div>
+    </div>
+    <div className="sb-nav">
+      <div className="sb-section">Menu</div>
+      {NAV.map(n=>(
+        <div key={n.id} className={`sb-item${page===n.id?' active':''}`} onClick={()=>setPage(n.id)}>
+          <Ico n={n.icon} s={15}/>{n.label}
+        </div>
+      ))}
+      <div className="sb-section" style={{marginTop:12}}>Sistema</div>
+      <div className={`sb-item${page==='api'?' active':''}`} onClick={()=>setPage('api')}>
+        <Ico n="server" s={15}/>Endpoints API
+      </div>
+    </div>
+    <div className="sb-foot">
+      <div className="sb-user">
+        <div className="sb-avatar">A</div>
+        <div><div className="sb-uname">aivacol</div><div className="sb-urole">Administrador</div></div>
+      </div>
+      <div className="sb-logout" onClick={onLogout}><Ico n="logout" s={14}/>Sair</div>
+    </div>
+  </div>;
+}
+
+/* ── TOPBAR ─────────────────────────────────────── */
+const PAGE_TITLES = {dashboard:'Dashboard',vehicles:'Veículos',models:'Modelos',brands:'Marcas',users:'Usuários',api:'Endpoints API'};
+function TopBar({page}){
+  return <div className="topbar">
+    <div>
+      <div className="tb-title">{PAGE_TITLES[page]||'—'}</div>
+      <div className="breadcrumb">Aivacol › <b>{PAGE_TITLES[page]}</b></div>
+    </div>
+    <div className="tb-right">
+      <span className="tb-tag">v1.0.0</span>
+      <button className="tb-bell"><Ico n="bell" s={15}/></button>
+    </div>
+  </div>;
+}
+
+/* ── ANIMATED COUNTER ───────────────────────────── */
+function Counter({to}){
+  const [v,setV]=useState(0);
+  useEffect(()=>{
+    let start=0; const step=Math.ceil(to/40);
+    const t=setInterval(()=>{start+=step;if(start>=to){setV(to);clearInterval(t);}else setV(start);},20);
+    return()=>clearInterval(t);
+  },[to]);
+  return <>{v.toLocaleString('pt-BR')}</>;
+}
+
+/* ── BAR CHART ──────────────────────────────────── */
+function BarChart({data}){
+  const max=Math.max(...data.map(d=>d.v));
+  return <div>{data.map(d=>(
+    <div key={d.label} className="chart-bar-row">
+      <div className="chart-bar-label">{d.label}</div>
+      <div className="chart-bar-track"><div className="chart-bar-fill" style={{width:`${(d.v/max)*100}%`,background:d.color||'var(--y)'}}/></div>
+      <div className="chart-bar-val">{d.v}</div>
+    </div>
+  ))}</div>;
+}
+
+/* ── DASHBOARD ───────────────────────────────────── */
+function Dashboard({vehicles,models,brands}){
+  const active=vehicles.filter(v=>v.status==='active').length;
+  const maint=vehicles.filter(v=>v.status==='maintenance').length;
+  return <div>
+    <div className="jwt-bar">
+      <Ico n="shield" s={14} c="" style={{color:'var(--y)'}}/>
+      <strong>JWT</strong>
+      <span>{JWT_TOKEN}</span>
+      <strong>● Redis: OK</strong>
+    </div>
+    <div className="kpi-grid">
+      <div className="kpi-card">
+        <div className="kpi-top"><div className="kpi-icon y"><Ico n="truck" s={18}/></div><span className="kpi-delta up">+3 hoje</span></div>
+        <div className="kpi-num"><Counter to={vehicles.length}/></div>
+        <div className="kpi-label">Veículos cadastrados</div>
+      </div>
+      <div className="kpi-card">
+        <div className="kpi-top"><div className="kpi-icon ok"><Ico n="check" s={18}/></div><span className="kpi-delta up">Frota ativa</span></div>
+        <div className="kpi-num"><Counter to={active}/></div>
+        <div className="kpi-label">Veículos ativos</div>
+      </div>
+      <div className="kpi-card">
+        <div className="kpi-top"><div className="kpi-icon og"><Ico n="tag" s={18}/></div></div>
+        <div className="kpi-num"><Counter to={models.length}/></div>
+        <div className="kpi-label">Modelos</div>
+      </div>
+      <div className="kpi-card">
+        <div className="kpi-top"><div className="kpi-icon bd"><Ico n="building" s={18}/></div></div>
+        <div className="kpi-num"><Counter to={brands.length}/></div>
+        <div className="kpi-label">Marcas</div>
+      </div>
+    </div>
+    <div className="dash-grid">
+      <div className="card">
+        <div className="card-hd"><h3>Frota por modelo</h3></div>
+        <BarChart data={models.slice(0,6).map(m=>({label:m.name,v:vehicles.filter(v=>v.model_id===m.id).length||0}))}/>
+      </div>
+      <div>
+        <div className="card" style={{marginBottom:16}}>
+          <div className="card-hd"><h3>Status do Sistema</h3></div>
+          {[
+            {ico:'server',label:'NestJS API',sub:'http://localhost:3000',color:'#1C1C20',badge:'ok',txt:'Online'},
+            {ico:'db',label:'SQL Server',sub:'TypeORM — Migrations OK',color:'#2D6A4F',badge:'ok',txt:'Online'},
+            {ico:'zap',label:'Redis Cache',sub:'127.0.0.1:6379',color:'#D9230F',badge:'ok',txt:'Conectado'},
+            {ico:'shield',label:'JWT Auth',sub:'HS256 — Token ativo',color:'#5046E4',badge:'ok',txt:'Ativo'},
+          ].map(s=>(
+            <div key={s.label} className="sys-item">
+              <div className="sys-left">
+                <div className="sys-ico" style={{background:s.color+'22',color:s.color}}><Ico n={s.ico} s={14}/></div>
+                <div><div className="sys-label">{s.label}</div><div className="sys-sub">{s.sub}</div></div>
+              </div>
+              <span className={`sys-badge ${s.badge}`}>{s.txt}</span>
+            </div>
+          ))}
+        </div>
+        <div className="card">
+          <div className="card-hd"><h3>Última atividade</h3></div>
+          {vehicles.slice(-4).reverse().map(v=>{
+            const m=MODELS_INIT.find(x=>x.id===v.model_id);
+            return <div key={v.id} className="act-item">
+              <div className="act-dot" style={{background:v.status==='active'?'var(--ok)':v.status==='maintenance'?'var(--wn)':'var(--t3)'}}/>
+              <div className="act-info"><strong>{v.license_plate}</strong><span>{m?.name} · {v.year}</span></div>
+              <div className="act-time">{fmtDate(v.created_at)}</div>
+            </div>;
+          })}
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── VEHICLES PAGE ───────────────────────────────── */
+function VehiclesPage({vehicles,setVehicles,models,brands,toast}){
+  const [search,setSearch]=useState('');
+  const [statusF,setStatusF]=useState('');
+  const [page,setPage]=useState(1);
+  const [modal,setModal]=useState(null); // null | {type:'add'|'edit'|'del', data?}
+  const [form,setForm]=useState({});
+  const PER=10;
+  const filtered=vehicles.filter(v=>{
+    const m=models.find(x=>x.id===v.model_id);
+    const q=search.toLowerCase();
+    return(!q||(v.license_plate.toLowerCase().includes(q)||m?.name.toLowerCase().includes(q)))&&(!statusF||v.status===statusF);
+  });
+  const pages=Math.ceil(filtered.length/PER)||1;
+  const rows=filtered.slice((page-1)*PER,page*PER);
+  const openAdd=()=>{setForm({license_plate:'',chassis:'',renavam:'',year:new Date().getFullYear(),model_id:models[0]?.id||'',status:'active'});setModal({type:'add'});};
+  const openEdit=v=>{setForm({...v});setModal({type:'edit',data:v});};
+  const openDel=v=>setModal({type:'del',data:v});
+  const [errs,setErrs]=useState({});
+  const validate=()=>{
+    const e={};
+    if(!form.license_plate) e.license_plate='Campo obrigatório';
+    if(!form.chassis||form.chassis.length!==17) e.chassis='Chassi deve ter 17 caracteres';
+    if(!form.renavam||form.renavam.length!==11) e.renavam='RENAVAM deve ter 11 dígitos';
+    if(!form.year||form.year<2000||form.year>2030) e.year='Ano inválido';
+    if(!form.model_id) e.model_id='Selecione um modelo';
+    setErrs(e); return !Object.keys(e).length;
+  };
+  const save=()=>{
+    if(!validate()) return;
+    if(modal.type==='add'){
+      setVehicles(p=>[...p,{...form,id:genId(p),created_at:new Date().toISOString().slice(0,10),created_by:'aivacol'}]);
+      toast('Veículo adicionado com sucesso!','ok');
+    } else {
+      setVehicles(p=>p.map(v=>v.id===form.id?{...form}:v));
+      toast('Veículo atualizado.','ok');
+    }
+    setModal(null);
+  };
+  const del=()=>{
+    setVehicles(p=>p.filter(v=>v.id!==modal.data.id));
+    toast('Veículo removido.','info'); setModal(null);
+  };
+  const fld=(key,label,props={})=>(
+    <div className="m-fg">
+      <label>{label}</label>
+      <input value={form[key]||''} onChange={e=>{setForm(p=>({...p,[key]:e.target.value}));setErrs(p=>({...p,[key]:''}));}} {...props}/>
+      {errs[key]&&<div className="err">{errs[key]}</div>}
+    </div>
+  );
+  return <div>
+    <div className="page-hd">
+      <div>
+        <h2>Veículos</h2>
+        <div className="breadcrumb" style={{marginTop:2}}>seed_vehicles.json · {vehicles.length} registros</div>
+      </div>
+      <button className="btn-add" onClick={openAdd}><Ico n="plus" s={14}/>Novo Veículo</button>
+    </div>
+    <div className="filters">
+      <div className="search-wrap"><Ico n="search" s={14}/><input placeholder="Buscar por placa ou modelo…" value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}}/></div>
+      <select className="filter-sel" value={statusF} onChange={e=>{setStatusF(e.target.value);setPage(1);}}>
+        <option value="">Todos os status</option>
+        <option value="active">Ativo</option>
+        <option value="maintenance">Manutenção</option>
+        <option value="inactive">Inativo</option>
+      </select>
+    </div>
+    <div className="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Placa</th><th>Chassi</th><th>RENAVAM</th><th>Ano</th><th>Modelo</th><th>Marca</th><th>Status</th><th>Criado</th><th></th>
+        </tr></thead>
+        <tbody>
+          {rows.length===0?<tr className="empty-row"><td colSpan={10}>Nenhum veículo encontrado.</td></tr>:
+          rows.map(v=>{
+            const m=models.find(x=>x.id===Number(v.model_id));
+            const b=brands.find(x=>x.id===m?.brand_id);
+            return <tr key={v.id}>
+              <td style={{color:'var(--t3)',fontSize:12}}>{v.id}</td>
+              <td><span className="mono">{v.license_plate}</span></td>
+              <td><span className="mono">{v.chassis}</span></td>
+              <td><span className="mono">{v.renavam}</span></td>
+              <td>{v.year}</td>
+              <td>{m?.name||'—'}</td>
+              <td>{b?.name||'—'}</td>
+              <td><Badge s={v.status}/></td>
+              <td style={{color:'var(--t3)',fontSize:12}}>{fmtDate(v.created_at)}</td>
+              <td><div className="tbl-actions">
+                <button className="btn-icon btn-edit" onClick={()=>openEdit(v)}><Ico n="pencil" s={13}/></button>
+                <button className="btn-icon btn-del" onClick={()=>openDel(v)}><Ico n="trash" s={13}/></button>
+              </div></td>
+            </tr>;
+          })}
+        </tbody>
+      </table>
+      <div className="pager">
+        <span>Mostrando {Math.min((page-1)*PER+1,filtered.length)}–{Math.min(page*PER,filtered.length)} de {filtered.length}</span>
+        <div className="pager-btns">
+          <button onClick={()=>setPage(p=>p-1)} disabled={page===1}>← Anterior</button>
+          <button onClick={()=>setPage(p=>p+1)} disabled={page===pages}>Próximo →</button>
+        </div>
+      </div>
+    </div>
+    <Modal open={modal?.type==='add'||modal?.type==='edit'} title={modal?.type==='add'?'Novo Veículo':'Editar Veículo'} onClose={()=>setModal(null)} onSave={save}>
+      <div className="m-row">{fld('license_plate','Placa *',{placeholder:'ABC1D23'})}{fld('year','Ano *',{type:'number',placeholder:'2023'})}</div>
+      {fld('chassis','Chassi * (17 caracteres)',{placeholder:'9BWZZZ377VT004251',maxLength:17})}
+      {fld('renavam','RENAVAM * (11 dígitos)',{placeholder:'12345678901',maxLength:11})}
+      <div className="m-row">
+        <div className="m-fg">
+          <label>Modelo *</label>
+          <select value={form.model_id||''} onChange={e=>{setForm(p=>({...p,model_id:Number(e.target.value)}));setErrs(p=>({...p,model_id:''}));}}>
+            <option value="">Selecionar…</option>
+            {models.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}
+          </select>
+          {errs.model_id&&<div className="err">{errs.model_id}</div>}
+        </div>
+        <div className="m-fg">
+          <label>Status</label>
+          <select value={form.status||'active'} onChange={e=>setForm(p=>({...p,status:e.target.value}))}>
+            <option value="active">Ativo</option>
+            <option value="maintenance">Manutenção</option>
+            <option value="inactive">Inativo</option>
+          </select>
+        </div>
+      </div>
+    </Modal>
+    <Modal open={modal?.type==='del'} title="Remover Veículo" onClose={()=>setModal(null)} onSave={del} saveLabel="Remover">
+      <div className="delete-confirm"><p>Tem certeza que deseja remover o veículo <strong>{modal?.data?.license_plate}</strong>? Esta ação não pode ser desfeita.</p></div>
+    </Modal>
+  </div>;
+}
+
+/* ── MODELS PAGE ─────────────────────────────────── */
+function ModelsPage({models,setModels,brands,toast}){
+  const [search,setSearch]=useState('');
+  const [modal,setModal]=useState(null);
+  const [form,setForm]=useState({name:'',brand_id:''});
+  const [errs,setErrs]=useState({});
+  const filtered=models.filter(m=>!search||m.name.toLowerCase().includes(search.toLowerCase()));
+  const save=()=>{
+    const e={};
+    if(!form.name) e.name='Nome obrigatório';
+    if(!form.brand_id) e.brand_id='Marca obrigatória';
+    setErrs(e); if(Object.keys(e).length) return;
+    if(modal.type==='add'){
+      setModels(p=>[...p,{...form,brand_id:Number(form.brand_id),id:genId(p),created_at:new Date().toISOString().slice(0,10),created_by:'aivacol'}]);
+      toast('Modelo adicionado!','ok');
+    } else {
+      setModels(p=>p.map(m=>m.id===form.id?{...form,brand_id:Number(form.brand_id)}:m));
+      toast('Modelo atualizado.','ok');
+    }
+    setModal(null);
+  };
+  const del=()=>{setModels(p=>p.filter(m=>m.id!==modal.data.id));toast('Modelo removido.','info');setModal(null);};
+  return <div>
+    <div className="page-hd">
+      <h2>Modelos <span style={{fontSize:14,fontWeight:500,color:'var(--t2)'}}>— CRUD obrigatório</span></h2>
+      <button className="btn-add" onClick={()=>{setForm({name:'',brand_id:brands[0]?.id||''});setErrs({});setModal({type:'add'})}}><Ico n="plus" s={14}/>Novo Modelo</button>
+    </div>
+    <div className="filters">
+      <div className="search-wrap"><Ico n="search" s={14}/><input placeholder="Buscar modelo…" value={search} onChange={e=>setSearch(e.target.value)}/></div>
+    </div>
+    <div className="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nome</th><th>Marca</th><th>Criado em</th><th>Criado por</th><th></th></tr></thead>
+        <tbody>{filtered.length===0?<tr className="empty-row"><td colSpan={6}>Nenhum modelo.</td></tr>:
+          filtered.map(m=>{
+            const b=brands.find(x=>x.id===m.brand_id);
+            return <tr key={m.id}>
+              <td style={{color:'var(--t3)',fontSize:12}}>{m.id}</td>
+              <td style={{fontWeight:600}}>{m.name}</td>
+              <td>{b?.name||'—'}</td>
+              <td style={{color:'var(--t3)',fontSize:12}}>{fmtDate(m.created_at)}</td>
+              <td><span className="mono" style={{fontSize:12}}>{m.created_by}</span></td>
+              <td><div className="tbl-actions">
+                <button className="btn-icon btn-edit" onClick={()=>{setForm({...m});setErrs({});setModal({type:'edit',data:m});}}><Ico n="pencil" s={13}/></button>
+                <button className="btn-icon btn-del" onClick={()=>setModal({type:'del',data:m})}><Ico n="trash" s={13}/></button>
+              </div></td>
+            </tr>;
+          })}
+        </tbody>
+      </table>
+    </div>
+    <Modal open={modal?.type==='add'||modal?.type==='edit'} title={modal?.type==='add'?'Novo Modelo':'Editar Modelo'} onClose={()=>setModal(null)} onSave={save}>
+      <div className="m-fg"><label>Nome *</label><input value={form.name} onChange={e=>{setForm(p=>({...p,name:e.target.value}));setErrs(p=>({...p,name:''}))}}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
+      <div className="m-fg"><label>Marca *</label>
+        <select value={form.brand_id} onChange={e=>{setForm(p=>({...p,brand_id:e.target.value}));setErrs(p=>({...p,brand_id:''}))}}>
+          <option value="">Selecionar…</option>
+          {brands.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}
+        </select>{errs.brand_id&&<div className="err">{errs.brand_id}</div>}
+      </div>
+    </Modal>
+    <Modal open={modal?.type==='del'} title="Remover Modelo" onClose={()=>setModal(null)} onSave={del} saveLabel="Remover">
+      <div className="delete-confirm"><p>Remover o modelo <strong>{modal?.data?.name}</strong>?</p></div>
+    </Modal>
+  </div>;
+}
+
+/* ── BRANDS PAGE ─────────────────────────────────── */
+function BrandsPage({brands,setBrands,models,toast}){
+  const [modal,setModal]=useState(null);
+  const [form,setForm]=useState({name:''});
+  const [err,setErr]=useState('');
+  const save=()=>{
+    if(!form.name){setErr('Nome obrigatório');return;}
+    if(modal.type==='add'){
+      setBrands(p=>[...p,{...form,id:genId(p),created_at:new Date().toISOString().slice(0,10),created_by:'aivacol'}]);
+      toast('Marca adicionada! (bônus)','ok');
+    } else {
+      setBrands(p=>p.map(b=>b.id===form.id?{...form}:b));
+      toast('Marca atualizada.','ok');
+    }
+    setModal(null);
+  };
+  const del=()=>{setBrands(p=>p.filter(b=>b.id!==modal.data.id));toast('Marca removida.','info');setModal(null);};
+  return <div>
+    <div className="page-hd">
+      <h2>Marcas <span style={{fontSize:14,fontWeight:500,color:'var(--og)'}}>— bônus ✦</span></h2>
+      <button className="btn-add" onClick={()=>{setForm({name:''});setErr('');setModal({type:'add'})}}><Ico n="plus" s={14}/>Nova Marca</button>
+    </div>
+    <div className="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nome</th><th>Modelos</th><th>Criado em</th><th>Criado por</th><th></th></tr></thead>
+        <tbody>{brands.map(b=>(
+          <tr key={b.id}>
+            <td style={{color:'var(--t3)',fontSize:12}}>{b.id}</td>
+            <td style={{fontWeight:600}}>{b.name}</td>
+            <td><span className="badge inactive">{models.filter(m=>m.brand_id===b.id).length}</span></td>
+            <td style={{color:'var(--t3)',fontSize:12}}>{fmtDate(b.created_at)}</td>
+            <td><span className="mono" style={{fontSize:12}}>{b.created_by}</span></td>
+            <td><div className="tbl-actions">
+              <button className="btn-icon btn-edit" onClick={()=>{setForm({...b});setErr('');setModal({type:'edit',data:b});}}><Ico n="pencil" s={13}/></button>
+              <button className="btn-icon btn-del" onClick={()=>setModal({type:'del',data:b})}><Ico n="trash" s={13}/></button>
+            </div></td>
+          </tr>
+        ))}</tbody>
+      </table>
+    </div>
+    <Modal open={modal?.type==='add'||modal?.type==='edit'} title={modal?.type==='add'?'Nova Marca':'Editar Marca'} onClose={()=>setModal(null)} onSave={save}>
+      <div className="m-fg"><label>Nome *</label><input value={form.name} onChange={e=>{setForm(p=>({...p,name:e.target.value}));setErr('');}}/>{err&&<div className="err">{err}</div>}</div>
+    </Modal>
+    <Modal open={modal?.type==='del'} title="Remover Marca" onClose={()=>setModal(null)} onSave={del} saveLabel="Remover">
+      <div className="delete-confirm"><p>Remover a marca <strong>{modal?.data?.name}</strong>?</p></div>
+    </Modal>
+  </div>;
+}
+
+/* ── USERS PAGE ──────────────────────────────────── */
+const USERS = [
+  {id:1,nickname:'aivacol',name:'Aivacol Admin',email:'admin@aivacol.com',role:'admin',created_at:'2024-01-01'},
+  {id:2,nickname:'joao.frota',name:'João Frota',email:'joao@aivacol.com',role:'user',created_at:'2024-01-10'},
+  {id:3,nickname:'ana.ops',name:'Ana Operações',email:'ana@aivacol.com',role:'user',created_at:'2024-01-15'},
+];
+function UsersPage(){
+  return <div>
+    <div className="page-hd"><h2>Usuários <span style={{fontSize:14,fontWeight:500,color:'var(--og)'}}>— bônus ✦</span></h2></div>
+    <div className="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nickname</th><th>Nome</th><th>E-mail</th><th>Papel</th><th>Criado em</th></tr></thead>
+        <tbody>{USERS.map(u=>(
+          <tr key={u.id}>
+            <td style={{color:'var(--t3)',fontSize:12}}>{u.id}</td>
+            <td><span className="mono">{u.nickname}</span></td>
+            <td style={{fontWeight:600}}>{u.name}</td>
+            <td style={{color:'var(--t2)'}}>{u.email}</td>
+            <td><span className={`badge ${u.role==='admin'?'active':'inactive'}`}>{u.role}</span></td>
+            <td style={{color:'var(--t3)',fontSize:12}}>{fmtDate(u.created_at)}</td>
+          </tr>
+        ))}</tbody>
+      </table>
+    </div>
+  </div>;
+}
+
+/* ── API PAGE ────────────────────────────────────── */
+const ENDPOINTS = [
+  {method:'POST',path:'/auth/login',desc:'Autenticação JWT — retorna access_token',tag:'auth'},
+  {method:'GET',path:'/vehicles',desc:'Listar todos os veículos (cache Redis)',tag:'vehicles'},
+  {method:'POST',path:'/vehicles',desc:'Cadastrar novo veículo',tag:'vehicles'},
+  {method:'GET',path:'/vehicles/:id',desc:'Buscar veículo por ID',tag:'vehicles'},
+  {method:'PUT',path:'/vehicles/:id',desc:'Atualizar veículo',tag:'vehicles'},
+  {method:'DELETE',path:'/vehicles/:id',desc:'Remover veículo',tag:'vehicles'},
+  {method:'GET',path:'/models',desc:'Listar modelos',tag:'models'},
+  {method:'POST',path:'/models',desc:'Criar modelo',tag:'models'},
+  {method:'GET',path:'/models/:id',desc:'Buscar modelo por ID',tag:'models'},
+  {method:'PUT',path:'/models/:id',desc:'Atualizar modelo',tag:'models'},
+  {method:'DELETE',path:'/models/:id',desc:'Remover modelo',tag:'models'},
+  {method:'GET',path:'/brands',desc:'Listar marcas (bônus)',tag:'brands'},
+  {method:'POST',path:'/brands',desc:'Criar marca (bônus)',tag:'brands'},
+  {method:'PUT',path:'/brands/:id',desc:'Atualizar marca (bônus)',tag:'brands'},
+  {method:'DELETE',path:'/brands/:id',desc:'Remover marca (bônus)',tag:'brands'},
+];
+const METHOD_C = {GET:'#1D6FA4',POST:'#1A7A4A',PUT:'#C17824',DELETE:'#C0392B'};
+function ApiPage(){
+  return <div>
+    <div className="page-hd" style={{marginBottom:16}}>
+      <div><h2>Endpoints da API</h2><div className="breadcrumb" style={{marginTop:2}}>NestJS REST · JWT obrigatório em todas as rotas</div></div>
+      <span className="tag-nest">NestJS 10+</span>
+    </div>
+    <div className="tbl-wrap">
+      <table>
+        <thead><tr><th>Método</th><th>Endpoint</th><th>Descrição</th><th>Módulo</th></tr></thead>
+        <tbody>{ENDPOINTS.map((e,i)=>(
+          <tr key={i}>
+            <td><span style={{fontFamily:'monospace',fontWeight:700,fontSize:12,color:METHOD_C[e.method]}}>{e.method}</span></td>
+            <td><span className="mono">{e.path}</span></td>
+            <td style={{color:'var(--t2)',fontSize:13}}>{e.desc}</td>
+            <td><span className="badge inactive">{e.tag}</span></td>
+          </tr>
+        ))}</tbody>
+      </table>
+    </div>
+  </div>;
+}
+
+/* ── APP ─────────────────────────────────────────── */
+function App(){
+  const [logged,setLogged]=useState(()=>!!localStorage.getItem('aivacol_user'));
+  const [page,setPage]=useState(()=>localStorage.getItem('aivacol_page')||'dashboard');
+  const [vehicles,setVehicles]=useState(VEHICLES_INIT);
+  const [models,setModels]=useState(MODELS_INIT);
+  const [brands,setBrands]=useState(BRANDS_INIT);
+  const [toasts,setToasts]=useState([]);
+  useEffect(()=>{ localStorage.setItem('aivacol_page',page); },[page]);
+  const toast=(msg,type='info')=>{
+    const id=Date.now();
+    setToasts(p=>[...p,{id,msg,type}]);
+    setTimeout(()=>setToasts(p=>p.filter(t=>t.id!==id)),3000);
+  };
+  const login=user=>{localStorage.setItem('aivacol_user',user);setLogged(true);toast('Bem-vindo, '+user+'! JWT gerado.','ok');};
+  const logout=()=>{localStorage.removeItem('aivacol_user');setLogged(false);};
+  if(!logged) return <><Login onLogin={login}/><ToastStack toasts={toasts}/></>;
+  const pages = {
+    dashboard:<Dashboard vehicles={vehicles} models={models} brands={brands}/>,
+    vehicles:<VehiclesPage vehicles={vehicles} setVehicles={setVehicles} models={models} brands={brands} toast={toast}/>,
+    models:<ModelsPage models={models} setModels={setModels} brands={brands} toast={toast}/>,
+    brands:<BrandsPage brands={brands} setBrands={setBrands} models={models} toast={toast}/>,
+    users:<UsersPage/>,
+    api:<ApiPage/>,
+  };
+  return <div className="app">
+    <Sidebar page={page} setPage={setPage} onLogout={logout}/>
+    <div className="main">
+      <TopBar page={page}/>
+      <div className="content">{pages[page]||pages.dashboard}</div>
+    </div>
+    <ToastStack toasts={toasts}/>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

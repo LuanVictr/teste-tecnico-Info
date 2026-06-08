@@ -37,3 +37,4 @@ Thumbs.db
 # Spec Kit / Claude internal
 .claude/
 .specify/
+specs/
