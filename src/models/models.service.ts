@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Model } from './models.entity';
 import { Brand } from '../brands/brands.entity';
 import { CreateModelDto } from './dto/create-model.dto';
@@ -67,7 +67,7 @@ export class ModelsService {
 
   private async assertNameAvailable(name: string, brandId: number | null | undefined, excludeId?: number): Promise<void> {
     const existing = await this.modelRepository.findOne({
-      where: { name, brand_id: brandId ?? null },
+      where: { name, brand_id: brandId ?? IsNull() },
     });
     if (existing && existing.id !== excludeId) {
       throw new ConflictException(
