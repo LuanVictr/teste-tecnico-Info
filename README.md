@@ -4,47 +4,95 @@ API REST para gerenciamento de frota de veículos, construída como teste técni
 
 ---
 
+## Índice
+
+- [Stack](#stack)
+- [Pré-requisitos](#pré-requisitos)
+- [Como rodar](#como-rodar)
+- [O que acontece na inicialização](#o-que-acontece-na-inicialização)
+- [Autenticação](#autenticação)
+- [Endpoints](#endpoints)
+- [Testando com Insomnia](#testando-com-insomnia)
+- [Importar veículos de exemplo](#importar-veículos-de-exemplo)
+- [Cache Redis](#cache-redis)
+- [Mensageria e Auditoria](#mensageria-e-auditoria-bônus)
+- [Rodando os testes](#rodando-os-testes)
+- [Variáveis de ambiente](#variáveis-de-ambiente)
+- [Arquitetura](#arquitetura)
+- [Deploy em VPS](#deploy-em-vps)
+
+---
+
 ## Stack
 
 | Camada | Tecnologia |
 |--------|-----------|
 | Runtime | Node.js 18+ |
 | Framework | NestJS 11 |
-| ORM | TypeORM (migrations only, `synchronize: false`) |
+| ORM | TypeORM — migrations only (`synchronize: false`) |
 | Banco relacional | SQL Server 2022 |
 | Cache | Redis 7 + cache-manager |
 | Mensageria | RabbitMQ 3 (bônus) |
 | Auditoria | MongoDB 7 + Mongoose (bônus) |
-| Autenticação | JWT (`@nestjs/jwt`) |
-| Documentação | Swagger (`@nestjs/swagger`) em `/api/docs` |
-| Testes | Jest (TDD) |
-| Container | Docker + Docker Compose (multistage) |
+| Autenticação | JWT (`@nestjs/jwt`) — todas as rotas protegidas |
+| Documentação | Swagger em `/api/docs` |
+| Testes | Jest (TDD) — 93 testes, 12 suites |
+| Container | Docker + Docker Compose multistage |
 
 ---
 
 ## Pré-requisitos
 
-- Docker >= 24 e Docker Compose V2
-- `make` (pré-instalado em Linux/macOS; no Windows use WSL ou Git Bash)
+### Docker _(obrigatório)_
+
+Você precisa do **Docker** e do **Docker Compose V2** instalados.
+
+| SO | Instalação |
+|----|-----------|
+| **Windows** | [Docker Desktop para Windows](https://docs.docker.com/desktop/install/windows-install/) — já inclui o Docker Compose |
+| **macOS** | [Docker Desktop para Mac](https://docs.docker.com/desktop/install/mac-install/) — já inclui o Docker Compose |
+| **Ubuntu / Debian** | [Guia oficial Linux](https://docs.docker.com/engine/install/ubuntu/) — instale também o [plugin Compose](https://docs.docker.com/compose/install/linux/) |
+
+Verifique a instalação:
+
+```bash
+docker --version        # Docker version 24.x.x ou superior
+docker compose version  # Docker Compose version v2.x.x ou superior
+```
+
+> **Windows sem WSL:** use o [Git Bash](https://git-scm.com/downloads) ou o terminal do Docker Desktop para rodar os comandos abaixo.
 
 ---
 
-## Início rápido — um único comando
+## Como rodar
+
+Clone o repositório e entre na pasta:
 
 ```bash
-git clone <repo-url> && cd teste-tecnico-Info && make start
+git clone <repo-url>
+cd teste-tecnico-Info
 ```
 
-O `make start` faz automaticamente:
-1. Cria o `.env` a partir do `.env.example` (se ainda não existir)
-2. Faz build da imagem e sobe todos os 5 serviços
-3. Aguarda healthchecks (SQL Server pode levar ~60 s na primeira vez)
-4. Imprime as URLs de acesso
+### Linux / macOS
 
-Na inicialização, a aplicação:
-- Executa as 7 migrations TypeORM
-- Cria o usuário `aivacol@aivacol.com` (idempotente)
-- Cria as marcas Volkswagen, Fiat e Chevrolet com seus modelos Gol, Uno e Onix (idempotente) — necessários para o `seed_vehicles.json`
+```bash
+make start
+```
+
+### Windows (Git Bash / WSL) ou qualquer sistema com bash
+
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+É só isso. O script / Makefile:
+
+1. Cria o `.env` automaticamente a partir do `.env.example` (se ainda não existir)
+2. Faz o build da imagem Docker e sobe os 5 serviços
+3. Imprime as URLs quando tudo estiver pronto
+
+> **Primeira execução:** o SQL Server precisa de ~60 segundos para inicializar. A aplicação só sobe após o healthcheck do banco passar — você verá as URLs quando estiver tudo pronto.
 
 ```
   Swagger UI : http://localhost:3000/api/docs
@@ -53,75 +101,40 @@ Na inicialização, a aplicação:
 
 ### Outros comandos
 
-```bash
-make stop     # para os containers
-make restart  # para e sobe novamente
-make logs     # tail nos logs da app
-make test     # roda os testes unitários (requer Node.js 18+)
-make clean    # para e remove volumes (apaga dados)
-```
+| Comando | Descrição |
+|---------|-----------|
+| `make stop` / `./start.sh stop` | Para os containers |
+| `make restart` | Para e sobe novamente |
+| `make logs` | Tail nos logs da aplicação |
+| `make clean` | Para e **remove os volumes** (apaga os dados) |
 
 ---
 
-## Desenvolvimento local
+## O que acontece na inicialização
 
-```bash
-# Instale as dependências
-npm install
+Ao subir pela primeira vez, a aplicação automaticamente:
 
-# Suba apenas a infraestrutura (DB, Redis, RabbitMQ, MongoDB)
-docker compose up -d sqlserver redis rabbitmq mongodb
+1. **Executa as 7 migrations** TypeORM — cria todas as tabelas no SQL Server
+2. **Cria o usuário seed** `aivacol@aivacol.com` (idempotente)
+3. **Cria marcas e modelos iniciais** (idempotente):
+   - Volkswagen → Gol (id 1)
+   - Fiat → Uno (id 2)
+   - Chevrolet → Onix (id 3)
 
-# Configure o .env apontando para localhost
-cp .env.example .env
-# DB_HOST=localhost, REDIS_HOST=localhost etc.
-
-# Inicie em modo watch
-npm run start:dev
-```
-
-### Comandos úteis
-
-```bash
-npm run start:dev       # watch mode
-npm run build           # compilar para dist/
-npm run test            # testes unitários
-npm run test:cov        # cobertura
-npm run lint            # ESLint
-```
-
----
-
-## Variáveis de ambiente
-
-Todas as variáveis estão documentadas em `.env.example`.
-
-| Variável | Descrição | Exemplo |
-|----------|-----------|---------|
-| `PORT` | Porta HTTP da aplicação | `3000` |
-| `JWT_SECRET` | Segredo de assinatura JWT | string aleatória longa |
-| `JWT_EXPIRATION` | TTL do token | `1d` |
-| `DB_HOST` | Host do SQL Server | `localhost` |
-| `DB_PORT` | Porta do SQL Server | `1433` |
-| `DB_USERNAME` | Usuário do banco | `sa` |
-| `DB_PASSWORD` | Senha do banco | — |
-| `DB_DATABASE` | Nome do banco | `fleet_management` |
-| `REDIS_HOST` | Host do Redis | `localhost` |
-| `REDIS_PORT` | Porta do Redis | `6379` |
-| `REDIS_PASSWORD` | Senha do Redis | — |
-| `CACHE_TTL_SECONDS` | TTL do cache de veículos | `60` |
-| `SEED_USER_EMAIL` | E-mail do usuário seed | `aivacol@aivacol.com` |
-| `SEED_USER_PASSWORD` | Senha do usuário seed | — |
-| `RABBITMQ_URL` | URL de conexão RabbitMQ | `amqp://guest:guest@localhost:5672` |
-| `MONGODB_URI` | URI do MongoDB | `mongodb://localhost:27017/fleet_audit` |
+Os modelos com IDs 1, 2, 3 são necessários para importar o `seed_vehicles.json`.
 
 ---
 
 ## Autenticação
 
-Todas as rotas exigem `Authorization: Bearer <token>`, exceto `POST /auth/login`.
+Todas as rotas exigem `Authorization: Bearer <token>`, **exceto** `POST /auth/login`.
 
-### Login
+**Credenciais do usuário seed:**
+
+| Campo | Valor |
+|-------|-------|
+| Email | `aivacol@aivacol.com` |
+| Senha | `aivacol@123` |
 
 ```bash
 curl -X POST http://localhost:3000/auth/login \
@@ -129,97 +142,85 @@ curl -X POST http://localhost:3000/auth/login \
   -d '{"email":"aivacol@aivacol.com","password":"aivacol@123"}'
 ```
 
-Resposta:
 ```json
 { "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
 ```
 
-Use o token em todas as requisições seguintes:
+Use o token em todas as requisições:
+
 ```bash
--H "Authorization: Bearer <access_token>"
+curl http://localhost:3000/vehicles \
+  -H "Authorization: Bearer <access_token>"
 ```
 
 ---
 
 ## Endpoints
 
-A documentação interativa completa está em **`/api/docs`** (Swagger UI).
+A documentação interativa completa (com exemplos e schemas) está no **Swagger UI**: `http://localhost:3000/api/docs`
 
 ### Auth
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| POST | `/auth/login` | Login — retorna JWT |
+| `POST` | `/auth/login` | Login — retorna JWT |
 
-### Brands (marcas)
+### Brands
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| POST | `/brands` | Criar marca |
-| GET | `/brands` | Listar (paginado) |
-| GET | `/brands/:id` | Buscar por ID (inclui modelos) |
-| PATCH | `/brands/:id` | Atualizar |
-| DELETE | `/brands/:id` | Remover (soft delete) |
+| `POST` | `/brands` | Criar marca |
+| `GET` | `/brands` | Listar (paginado) |
+| `GET` | `/brands/:id` | Buscar por ID — inclui modelos associados |
+| `PATCH` | `/brands/:id` | Atualizar |
+| `DELETE` | `/brands/:id` | Remover — 409 se houver modelos vinculados |
 
-### Models (modelos de veículo)
+### Models
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| POST | `/models` | Criar modelo |
-| GET | `/models` | Listar (paginado) |
-| GET | `/models/:id` | Buscar por ID |
-| PATCH | `/models/:id` | Atualizar |
-| DELETE | `/models/:id` | Remover (soft delete) |
+| `POST` | `/models` | Criar modelo — 404 se brand_id inexistente, 409 se nome duplicado na mesma marca |
+| `GET` | `/models` | Listar (paginado) |
+| `GET` | `/models/:id` | Buscar por ID |
+| `PATCH` | `/models/:id` | Atualizar |
+| `DELETE` | `/models/:id` | Remover — 409 se houver veículos vinculados |
 
-### Vehicles (veículos)
+### Vehicles
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| POST | `/vehicles` | Registrar veículo |
-| GET | `/vehicles` | Listar (paginado, com filtros + cache Redis) |
-| GET | `/vehicles/:id` | Buscar por ID (cache Redis) |
-| PATCH | `/vehicles/:id` | Atualizar (invalida cache) |
-| DELETE | `/vehicles/:id` | Remover (soft delete, invalida cache) |
+| `POST` | `/vehicles` | Registrar veículo |
+| `GET` | `/vehicles` | Listar paginado — **cacheado no Redis** |
+| `GET` | `/vehicles/:id` | Buscar por ID — **cacheado no Redis** |
+| `PATCH` | `/vehicles/:id` | Atualizar — invalida cache |
+| `DELETE` | `/vehicles/:id` | Remover — invalida cache |
 
-**Filtros disponíveis em `GET /vehicles`**: `page`, `limit`, `modelId`, `year`
+Filtros disponíveis em `GET /vehicles`: `page`, `limit`, `modelId`, `year`
 
-### Users (usuários)
+### Users
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| POST | `/users` | Criar usuário |
-| GET | `/users` | Listar (paginado) |
-| GET | `/users/:id` | Buscar por ID |
-| PATCH | `/users/:id` | Atualizar |
-| DELETE | `/users/:id` | Remover (soft delete) |
+| `POST` | `/users` | Criar usuário — 409 se email duplicado |
+| `GET` | `/users` | Listar (paginado) |
+| `GET` | `/users/:id` | Buscar por ID |
+| `PATCH` | `/users/:id` | Atualizar |
+| `DELETE` | `/users/:id` | Remover (soft delete) |
 
 ---
 
-## Cache Redis
+## Testando com Insomnia
 
-- Aplicado em `GET /vehicles` e `GET /vehicles/:id`
-- TTL configurável via `CACHE_TTL_SECONDS`
-- Invalidado automaticamente em `POST`, `PATCH` e `DELETE /vehicles`
-- Chaves: `vehicles:list:*` e `vehicles:detail:{id}`
+Importe o arquivo `insomnia.json` (raiz do projeto) no [Insomnia](https://insomnia.rest/download).
 
----
+Após importar:
 
-## Mensageria e Auditoria (bônus)
-
-Cada mutação nos recursos publica um evento no RabbitMQ:
-
-- **Exchange**: `fleet.events` (topic)
-- **Routing key**: `{entity}.{action}` — ex: `vehicle.created`, `model.updated`
-- **Payload**: `{ entity, action, payload, userId, timestamp }`
-
-O `AuditConsumer` consome a fila `audit_queue` (bound com wildcard `#`) e persiste cada evento no MongoDB, coleção `audit_logs`.
-
-> A falha no RabbitMQ **não bloqueia** as operações principais — o publish é fire-and-forget.
-
-**RabbitMQ Management UI**: `http://localhost:15672` (user: `guest`, pass: `guest`)
+1. Selecione o ambiente **Local**
+2. Execute **Login** (pasta Autenticação) — o `access_token` é salvo automaticamente no ambiente
+3. Todos os outros requests já usam o token automaticamente
 
 ---
 
-## Seed de veículos
+## Importar veículos de exemplo
 
-O arquivo `seed_vehicles.json` contém 22 veículos de exemplo (placas nos formatos antigo e Mercosul).
+O arquivo `seed_vehicles.json` contém 22 veículos com placas nos formatos antigo (`ABC-1234`) e Mercosul (`ABC1D23`).
 
-Os modelos com IDs 1 (Gol), 2 (Uno) e 3 (Onix) são criados automaticamente na inicialização, então o seed funciona diretamente após o login:
+Com `jq` e `curl` instalados, importe tudo de uma vez:
 
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:3000/auth/login \
@@ -237,26 +238,81 @@ done
 
 ---
 
-## Testes
+## Cache Redis
+
+- Ativo em `GET /vehicles` e `GET /vehicles/:id`
+- TTL configurável via `CACHE_TTL_SECONDS` no `.env` (padrão: 60 s)
+- Invalidado automaticamente em `POST`, `PATCH` e `DELETE /vehicles`
+- Chaves: `vehicles:list:<filtros>` e `vehicles:detail:<id>`
+
+Inspecionar cache ao vivo:
 
 ```bash
-# Todos os testes unitários
-npm run test
-
-# Com cobertura
-npm run test:cov
-
-# Modo watch
-npm run test:watch
+docker exec aivacol-fleet-redis \
+  redis-cli -a YourStrong@Passw0rd KEYS "vehicles:*"
 ```
-
-Cobertura de: serviços, validações de negócio, guards JWT, publisher de eventos, consumer de auditoria.
 
 ---
 
-## Insomnia
+## Mensageria e Auditoria (bônus)
 
-Importe `insomnia.json` na raiz do projeto no Insomnia para ter todos os endpoints pré-configurados com variáveis de ambiente.
+Cada mutação (`created`, `updated`, `deleted`) publica um evento no RabbitMQ:
+
+- **Exchange**: `fleet.events` — tipo `topic`
+- **Routing key**: `{entity}.{action}` — ex: `vehicle.created`, `model.updated`
+- **Payload**: `{ entity, action, payload, userId, timestamp }`
+
+O `AuditConsumer` consome a fila `audit_queue` (wildcard `#`) e persiste em `audit_logs` no MongoDB.
+
+> Falha no RabbitMQ **não bloqueia** as operações — publish é fire-and-forget.
+
+**RabbitMQ Management UI**: `http://localhost:15672` — `guest` / `guest`
+
+Verificar logs de auditoria no MongoDB:
+
+```bash
+docker exec aivacol-fleet-mongodb \
+  mongosh fleet_audit --eval 'db.audit_logs.find().limit(5).pretty()'
+```
+
+---
+
+## Rodando os testes
+
+Requer Node.js 18+ instalado localmente.
+
+```bash
+npm install
+npm run test        # 93 testes unitários
+npm run test:cov    # com relatório de cobertura
+```
+
+Cobertura: auth, users, brands, models, vehicles, cache, pagination, EventPublisherService, AuditConsumer.
+
+---
+
+## Variáveis de ambiente
+
+O `.env.example` já contém todos os valores necessários para rodar localmente — basta copiá-lo (o script faz isso automaticamente).
+
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `PORT` | Porta HTTP | `3000` |
+| `JWT_SECRET` | Segredo de assinatura JWT | — |
+| `JWT_EXPIRATION` | TTL do token | `1d` |
+| `DB_HOST` | Host do SQL Server | `localhost` |
+| `DB_PORT` | Porta do SQL Server | `1433` |
+| `DB_USERNAME` | Usuário do banco | `sa` |
+| `DB_PASSWORD` | Senha do banco | — |
+| `DB_DATABASE` | Nome do banco | `fleet_management` |
+| `REDIS_HOST` | Host do Redis | `localhost` |
+| `REDIS_PORT` | Porta do Redis | `6379` |
+| `REDIS_PASSWORD` | Senha do Redis | — |
+| `CACHE_TTL_SECONDS` | TTL do cache de veículos (segundos) | `60` |
+| `SEED_USER_EMAIL` | E-mail do usuário seed | `aivacol@aivacol.com` |
+| `SEED_USER_PASSWORD` | Senha do usuário seed | — |
+| `RABBITMQ_URL` | URL de conexão RabbitMQ | `amqp://guest:guest@...` |
+| `MONGODB_URI` | URI do MongoDB | `mongodb://...` |
 
 ---
 
@@ -280,22 +336,26 @@ Client ──HTTP :3000──► NestJS App
            (TypeORM)  (cache-manager)            fleet.events   audit_logs
 ```
 
-O diagrama completo do sistema está em `docs/system-design.excalidraw` (importar em excalidraw.com).
+O diagrama completo está em `docs/system-design.excalidraw` — importe em [excalidraw.com](https://excalidraw.com).
 
 ---
 
-## Deploy em VPS (Hostinger)
+## Deploy em VPS
 
 ```bash
-# Na VPS, após clonar o repositório:
+git clone <repo-url>
+cd teste-tecnico-Info
 cp .env.example .env
-# Configure senhas seguras no .env
+
+# Edite .env com senhas seguras antes de continuar
+nano .env
 
 docker compose up -d --build
 ```
 
 Recomendações para produção:
-- Use `NODE_ENV=production`
-- Configure `JWT_SECRET` com string aleatória de 64+ caracteres
-- Use senhas fortes para SQL Server, Redis e RabbitMQ
-- Configure um reverse proxy (nginx/Caddy) na frente da porta 3000
+
+- `JWT_SECRET` com no mínimo 64 caracteres aleatórios
+- Senhas únicas e fortes para SQL Server, Redis e RabbitMQ
+- Reverse proxy nginx ou Caddy na frente da porta 3000
+- `NODE_ENV=production` no `.env`
