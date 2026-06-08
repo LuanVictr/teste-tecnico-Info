@@ -115,13 +115,7 @@ export class VehiclesService {
 
   private async invalidateListCache(): Promise<void> {
     try {
-      const store = (
-        this.cacheManager as unknown as { store: { keys(p: string): Promise<string[]> } }
-      ).store;
-      const listKeys = await store.keys('vehicles:list*');
-      if (listKeys.length) {
-        await Promise.all(listKeys.map((key) => this.cacheManager.del(key)));
-      }
+      await this.cacheManager.clear();
     } catch {}
   }
 

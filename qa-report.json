@@ -1,0 +1,165 @@
+{
+  "report": {
+    "date": "2026-06-08",
+    "project": "Aivacol Fleet Management Backend",
+    "tester": "QA Senior Integration Battery",
+    "summary": {
+      "total_tests": 35,
+      "passed": 34,
+      "failed": 0,
+      "known_issues": 1,
+      "bugs_found_and_fixed": 5
+    }
+  },
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Infrastructure Health",
+      "tests": [
+        { "id": "T01-INF", "description": "SQL Server container healthy", "status": "PASS" },
+        { "id": "T02-INF", "description": "Redis container healthy", "status": "PASS" },
+        { "id": "T03-INF", "description": "RabbitMQ container healthy", "status": "PASS" },
+        { "id": "T04-INF", "description": "MongoDB container healthy", "status": "PASS" },
+        { "id": "T05-INF", "description": "App starts and Swagger UI accessible", "status": "PASS" }
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "Authentication (US1)",
+      "tests": [
+        { "id": "T1", "description": "POST /auth/login with valid credentials → 200 + access_token", "status": "PASS", "note": "Fixed: was returning 201 (bug); corrected with @HttpCode(HttpStatus.OK)" },
+        { "id": "T2", "description": "Request without Authorization header → 401", "status": "PASS" },
+        { "id": "T3", "description": "Request with invalid JWT → 401", "status": "PASS" },
+        { "id": "T4", "description": "POST /auth/login with wrong password → 401", "status": "PASS" }
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Brands CRUD (Bonus)",
+      "tests": [
+        { "id": "T5", "description": "POST /brands → 201 + brand with ID", "status": "PASS" },
+        { "id": "T6", "description": "GET /brands → paginated list", "status": "PASS" },
+        { "id": "T7", "description": "GET /brands/:id → brand with associated models", "status": "PASS" },
+        { "id": "T8", "description": "PATCH /brands/:id → updated fields", "status": "PASS" },
+        { "id": "T9", "description": "DELETE /brands/:id with models → 409 Conflict", "status": "PASS" },
+        { "id": "T10", "description": "POST /brands duplicate name → 409", "status": "PASS" },
+        { "id": "T11", "description": "GET /brands/99999 → 404", "status": "PASS" }
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Models CRUD",
+      "tests": [
+        { "id": "T12", "description": "POST /models with brand_id optional → 201", "status": "PASS", "note": "Design: brand_id is optional" },
+        { "id": "T13", "description": "POST /models with invalid brand_id → 404", "status": "PASS" },
+        { "id": "T14", "description": "PATCH /models/:id → 200 with updated data", "status": "PASS" },
+        { "id": "T15", "description": "DELETE /models/:id with vehicles → 409 Conflict", "status": "PASS" }
+      ]
+    },
+    {
+      "phase": 5,
+      "name": "Vehicles CRUD",
+      "tests": [
+        { "id": "T16", "description": "POST /vehicles with valid data → 201", "status": "PASS" },
+        { "id": "T17", "description": "POST /vehicles with nonexistent model_id → 404", "status": "PASS" },
+        { "id": "T18", "description": "GET /vehicles → paginated list with model relation", "status": "PASS" },
+        { "id": "T19", "description": "GET /vehicles/:id → vehicle with model relation", "status": "PASS" },
+        { "id": "T20", "description": "PATCH /vehicles/:id → 200 with updated data", "status": "PASS" },
+        { "id": "T21", "description": "DELETE /vehicles/:id → 200 with soft delete", "status": "PASS" },
+        { "id": "T22", "description": "GET /vehicles/:id after soft delete → 404", "status": "PASS" }
+      ]
+    },
+    {
+      "phase": 6,
+      "name": "Redis Cache",
+      "tests": [
+        { "id": "T23", "description": "GET /vehicles/:id (first call) → cache miss, populates Redis", "status": "PASS", "redis_key": "keyv::keyv:vehicles:detail:{id}" },
+        { "id": "T24", "description": "GET /vehicles/:id (second call) → cache hit", "status": "PASS" },
+        { "id": "T25", "description": "PATCH /vehicles/:id → cache invalidated (Redis empty)", "status": "PASS" },
+        { "id": "T26", "description": "GET /vehicles/:id after mutation → cache miss, re-populates", "status": "PASS" },
+        { "id": "T27", "description": "GET /vehicles (list) → populates Redis with paginated key", "status": "PASS", "redis_key": "keyv::keyv:vehicles:list:limit={n}:page={n}" }
+      ]
+    },
+    {
+      "phase": 7,
+      "name": "Messaging & Audit (Bonus)",
+      "tests": [
+        { "id": "T28", "description": "POST /vehicles → event published to fleet.events exchange", "status": "PASS" },
+        { "id": "T29", "description": "vehicle.created event → audit_log in MongoDB", "status": "PASS" },
+        { "id": "T30", "description": "PATCH /vehicles → vehicle.updated → audit_log in MongoDB", "status": "PASS" },
+        { "id": "T31", "description": "DELETE /vehicles → vehicle.deleted → audit_log in MongoDB", "status": "PASS" }
+      ]
+    },
+    {
+      "phase": 8,
+      "name": "Pagination & Filters",
+      "tests": [
+        { "id": "T32", "description": "GET /vehicles?page=1&limit=2 → 2 items + meta pagination", "status": "PASS" },
+        { "id": "T33", "description": "GET /vehicles?modelId=7 → only vehicles with model_id=7", "status": "PASS" },
+        { "id": "T34", "description": "GET /vehicles?year=2021 → only vehicles with year=2021", "status": "PASS" }
+      ]
+    },
+    {
+      "phase": 9,
+      "name": "Anti-False-Positive",
+      "tests": [
+        { "id": "T35a", "description": "No Authorization header → 401 Unauthorized", "status": "PASS" },
+        { "id": "T35b", "description": "Invalid JWT token → 401 Unauthorized", "status": "PASS" },
+        { "id": "T35c", "description": "GET /vehicles/99999 → 404 Not Found", "status": "PASS" },
+        { "id": "T35d", "description": "Duplicate license_plate → 409 Conflict", "status": "PASS" },
+        { "id": "T35e", "description": "Missing required fields → 400 Bad Request", "status": "PASS" }
+      ]
+    }
+  ],
+  "bugs_found_and_fixed": [
+    {
+      "id": "BUG-1",
+      "severity": "HIGH",
+      "description": "Redis port mismatch — app connected to wrong Redis instance (port 6379 = imobi_redis) instead of aivacol-fleet-redis (port 6380)",
+      "root_cause": "REDIS_PORT=6379 in .env, but aivacol-fleet-redis is mapped to host port 6380. Another project's Redis (imobi_redis) occupied port 6379.",
+      "fix": "Updated .env REDIS_PORT=6380 for local dev. Added explicit REDIS_PORT: '6379' override in docker-compose app service for Docker networking."
+    },
+    {
+      "id": "BUG-2",
+      "severity": "HIGH",
+      "description": "MongoDB port mismatch — app connected to wrong MongoDB (port 27017 = another project) instead of aivacol-fleet-mongodb (port 27018)",
+      "root_cause": "MONGODB_URI=mongodb://localhost:27017 in .env. Another project's MongoDB occupied port 27017.",
+      "fix": "Updated .env MONGODB_URI=mongodb://localhost:27018/fleet_audit for local dev. docker-compose already overrides to mongodb://mongodb:27017 for Docker."
+    },
+    {
+      "id": "BUG-3",
+      "severity": "CRITICAL",
+      "description": "Redis cache completely non-functional — @nestjs/cache-manager v3 API incompatibility with cache-manager-redis-yet",
+      "root_cause": "@nestjs/cache-manager v3 uses cache-manager v7 + keyv v5 architecture. The old 'store' config key was silently ignored; the module fell back to in-memory cache. No Redis keys were ever written.",
+      "fix": "Rewrote cache.module.ts to use @keyv/redis (the correct package for this stack). Used KeyvRedis adapter (default export) wrapped with CJS Keyv to pass instanceof check in @nestjs/cache-manager v3."
+    },
+    {
+      "id": "BUG-4",
+      "severity": "MEDIUM",
+      "description": "Cache list invalidation used store.keys(pattern) API that no longer exists in cache-manager v7",
+      "root_cause": "cache-manager v7 Cache type has no keys() method. The cast to access store.keys() silently caught the undefined error, making invalidations no-ops.",
+      "fix": "Changed invalidateListCache() to call cacheManager.clear() with noNamespaceAffectsAll: true on the KeyvRedis adapter, clearing all cached vehicle entries on mutations."
+    },
+    {
+      "id": "BUG-5",
+      "severity": "LOW",
+      "description": "POST /auth/login returned HTTP 201 (Created) instead of 200 (OK)",
+      "root_cause": "NestJS default for POST handlers is 201. Login is not creating a resource.",
+      "fix": "Added @HttpCode(HttpStatus.OK) to the login controller method."
+    }
+  ],
+  "known_issues": [
+    {
+      "id": "KNOWN-1",
+      "severity": "LOW",
+      "description": "license_plate field has no format validation — accepts any string up to 10 chars",
+      "note": "By design per spec: no regex enforced to support both old format (ABC-1234) and Mercosul (ABC1D23)"
+    }
+  ],
+  "architecture_notes": {
+    "cache_key_format": "keyv::keyv:{original_key} — prefix added by Keyv CJS layer + @keyv/redis separator",
+    "cache_invalidation": "clear() flushes entire cache on any vehicle mutation (list + detail). Acceptable for this scope.",
+    "audit_pipeline": "vehicle mutation → EventPublisherService.publish() (fire-and-forget) → RabbitMQ fleet.events exchange → AuditConsumer → MongoDB audit_logs",
+    "seed_ids": "On fresh DB: brands IDs 1-3, models IDs 1-3. seed_vehicles.json uses model_id 1/2/3. Idempotent: re-running does not create duplicates."
+  }
+}

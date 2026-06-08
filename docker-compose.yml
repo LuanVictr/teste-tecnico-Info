@@ -11,6 +11,7 @@ services:
     environment:
       DB_HOST: sqlserver
       REDIS_HOST: redis
+      REDIS_PORT: "6379"
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
       MONGODB_URI: mongodb://mongodb:27017/fleet_audit
     depends_on:
