@@ -73,24 +73,27 @@ git clone <repo-url>
 cd teste-tecnico-Info
 ```
 
-### Linux / macOS
+Escolha qualquer uma das três formas abaixo — todas são equivalentes e sobem API + Frontend juntos:
 
 ```bash
+# Opção 1 — npm (qualquer SO com Node.js)
+npm start
+
+# Opção 2 — Make (Linux / macOS)
 make start
-```
 
-### Windows (Git Bash / WSL) ou qualquer sistema com bash
-
-```bash
+# Opção 3 — shell script (Linux / macOS / Git Bash / WSL)
 chmod +x start.sh
 ./start.sh
 ```
 
-É só isso. O script / Makefile:
+O `npm start` cria o `.env` automaticamente se ainda não existir, faz o build do Docker e sobe todos os serviços.
 
-1. Cria o `.env` automaticamente a partir do `.env.example` (se ainda não existir)
-2. Faz o build da imagem Docker e sobe os 5 serviços
-3. Imprime as URLs quando tudo estiver pronto
+As três opções:
+
+1. Criam o `.env` automaticamente a partir do `.env.example` (se ainda não existir)
+2. Fazem o build das imagens Docker e sobem os 6 serviços (API, Frontend, SQL Server, Redis, RabbitMQ, MongoDB)
+3. Imprimem as URLs quando tudo estiver pronto
 
 > **Sobre o `.env.example`:** ele contém credenciais reais de demonstração (senhas, JWT secret, etc.) propositalmente commitadas no repositório. Isso é **intencional para este teste técnico** — o objetivo é que qualquer avaliador rode o projeto com zero configuração manual. Em um projeto de produção, o `.env.example` conteria apenas placeholders (`DB_PASSWORD=your-password-here`) e o `.env` real nunca seria versionado.
 
@@ -101,14 +104,36 @@ chmod +x start.sh
   RabbitMQ   : http://localhost:15672  (guest / guest)
 ```
 
-### Outros comandos
+### Outros comandos Docker
 
 | Comando | Descrição |
 |---------|-----------|
-| `make stop` / `./start.sh stop` | Para os containers |
+| `npm stop` / `make stop` | Para os containers |
 | `make restart` | Para e sobe novamente |
 | `make logs` | Tail nos logs da aplicação |
 | `make clean` | Para e **remove os volumes** (apaga os dados) |
+
+---
+
+### Desenvolvimento local (sem Docker)
+
+Se preferir rodar API e frontend diretamente na sua máquina (você precisará ter SQL Server, Redis, RabbitMQ e MongoDB disponíveis e o `.env` configurado com os hosts corretos):
+
+```bash
+# Terminal 1 — API NestJS em watch mode (hot reload + logs em tempo real)
+npm run api
+
+# Terminal 2 — Frontend Vite em dev mode (HMR + logs)
+npm run front
+```
+
+| Serviço | URL local |
+|---------|-----------|
+| API (NestJS) | http://localhost:3000 |
+| Frontend (Vite) | http://localhost:3001 |
+| Swagger | http://localhost:3000/api/docs |
+
+> Para dev local, o Vite já inclui um proxy que redireciona `/api-proxy/*` → `http://localhost:3000`.
 
 ---
 
