@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { AppCacheModule } from './shared/cache/cache.module';
 import { MessagingModule } from './shared/messaging/messaging.module';
 import { AuditModule } from './audit/audit.module';
+import { SeedModule } from './database/seed.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { AuditModule } from './audit/audit.module';
     AppCacheModule,
     MessagingModule,
     AuditModule,
+    SeedModule,
     AuthModule,
     UsersModule,
     ModelsModule,

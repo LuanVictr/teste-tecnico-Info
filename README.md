@@ -25,31 +25,41 @@ API REST para gerenciamento de frota de veículos, construída como teste técni
 ## Pré-requisitos
 
 - Docker >= 24 e Docker Compose V2
-- Node.js 18+ (apenas para desenvolvimento local)
+- `make` (pré-instalado em Linux/macOS; no Windows use WSL ou Git Bash)
 
 ---
 
-## Início rápido com Docker
+## Início rápido — um único comando
 
 ```bash
-# 1. Clone o repositório
-git clone <repo-url>
-cd teste-tecnico-Info
-
-# 2. Copie e ajuste as variáveis de ambiente
-cp .env.example .env
-# Edite .env se quiser alterar senhas/portas
-
-# 3. Suba todos os serviços
-docker compose up -d
-
-# 4. Acesse a API
-open http://localhost:3000/api/docs
+git clone <repo-url> && cd teste-tecnico-Info && make start
 ```
 
-A aplicação executa as migrations automaticamente na inicialização e cria o usuário seed `aivacol` caso ainda não exista.
+O `make start` faz automaticamente:
+1. Cria o `.env` a partir do `.env.example` (se ainda não existir)
+2. Faz build da imagem e sobe todos os 5 serviços
+3. Aguarda healthchecks (SQL Server pode levar ~60 s na primeira vez)
+4. Imprime as URLs de acesso
 
-> **Nota**: O SQL Server pode demorar até 60 s na primeira inicialização. O Docker Compose aguarda o healthcheck antes de iniciar a aplicação.
+Na inicialização, a aplicação:
+- Executa as 7 migrations TypeORM
+- Cria o usuário `aivacol@aivacol.com` (idempotente)
+- Cria as marcas Volkswagen, Fiat e Chevrolet com seus modelos Gol, Uno e Onix (idempotente) — necessários para o `seed_vehicles.json`
+
+```
+  Swagger UI : http://localhost:3000/api/docs
+  RabbitMQ   : http://localhost:15672  (guest / guest)
+```
+
+### Outros comandos
+
+```bash
+make stop     # para os containers
+make restart  # para e sobe novamente
+make logs     # tail nos logs da app
+make test     # roda os testes unitários (requer Node.js 18+)
+make clean    # para e remove volumes (apaga dados)
+```
 
 ---
 
@@ -207,12 +217,16 @@ O `AuditConsumer` consome a fila `audit_queue` (bound com wildcard `#`) e persis
 
 ## Seed de veículos
 
-O arquivo `seed_vehicles.json` contém 22 veículos de exemplo (placas nos formatos antigo e Mercosul) para importação manual ou uso em testes.
+O arquivo `seed_vehicles.json` contém 22 veículos de exemplo (placas nos formatos antigo e Mercosul).
 
-Para cadastrá-los, autentique-se e faça um `POST /vehicles` para cada entrada do arquivo, ou use o script abaixo:
+Os modelos com IDs 1 (Gol), 2 (Uno) e 3 (Onix) são criados automaticamente na inicialização, então o seed funciona diretamente após o login:
 
 ```bash
-TOKEN="<seu_token>"
+TOKEN=$(curl -s -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"aivacol@aivacol.com","password":"aivacol@123"}' \
+  | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
+
 jq -c '.[]' seed_vehicles.json | while read vehicle; do
   curl -s -X POST http://localhost:3000/vehicles \
     -H "Authorization: Bearer $TOKEN" \
@@ -220,8 +234,6 @@ jq -c '.[]' seed_vehicles.json | while read vehicle; do
     -d "$vehicle"
 done
 ```
-
-> Certifique-se de criar previamente os modelos com IDs 1, 2 e 3 (`POST /models`).
 
 ---
 
