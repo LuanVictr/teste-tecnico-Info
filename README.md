@@ -2,6 +2,13 @@
 
 API REST para gerenciamento de frota de veículos, construída como teste técnico para a Aivacol.
 
+> **Credenciais de acesso (API + Frontend)**
+>
+> | Campo | Valor |
+> |-------|-------|
+> | E-mail | `aivacol@aivacol.com` |
+> | Senha | `aivacol@123` |
+
 ---
 
 ## Índice
