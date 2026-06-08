@@ -36,7 +36,7 @@ export class VehiclesService {
   }
 
   async findAll(filters: ListVehiclesDto) {
-    const cacheKey = buildCacheKey('vehicles:list', filters as unknown as Record<string, unknown>);
+    const cacheKey = buildCacheKey('vehicles:list', { ...filters });
     const cached = await this.cacheManager.get(cacheKey);
     if (cached) return cached;
 
