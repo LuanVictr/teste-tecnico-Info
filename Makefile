@@ -9,6 +9,7 @@ start: .env
 	@echo "  O SQL Server pode levar até 60s para ficar"
 	@echo "  pronto na primeira execução."
 	@echo ""
+	@echo "  Frontend   : http://localhost:8080"
 	@echo "  Swagger UI : http://localhost:3000/api/docs"
 	@echo "  RabbitMQ   : http://localhost:15672"
 	@echo "               user: guest / pass: guest"
