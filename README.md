@@ -208,13 +208,30 @@ Filtros disponíveis em `GET /vehicles`: `page`, `limit`, `modelId`, `year`
 
 ## Testando com Insomnia
 
-Importe o arquivo `insomnia.json` (raiz do projeto) no [Insomnia](https://insomnia.rest/download).
+A collection com **30 requests** prontos está no arquivo `insomnia.json` na raiz do projeto.
 
-Após importar:
+### Como importar
 
-1. Selecione o ambiente **Local**
-2. Execute **Login** (pasta Autenticação) — o `access_token` é salvo automaticamente no ambiente
-3. Todos os outros requests já usam o token automaticamente
+1. Abra o [Insomnia](https://insomnia.rest/download)
+2. Clique em **File → Import** (ou arraste o arquivo para a janela)
+3. Selecione o arquivo `insomnia.json`
+4. Selecione o ambiente **Local** (`http://localhost:3000`)
+
+### Como usar
+
+1. Abra a pasta **Autenticação** e execute o request **Login**
+2. O `access_token` é salvo automaticamente na variável de ambiente `token`
+3. Todos os demais requests já enviam o header `Authorization: Bearer {{token}}` automaticamente — não é preciso copiar o token manualmente
+
+### O que está incluído
+
+| Pasta | Requests |
+|-------|----------|
+| Autenticação | Login (credenciais válidas e inválidas) |
+| Veículos | Listar, filtrar por modelId/year, buscar por ID, criar, atualizar, deletar |
+| Modelos | CRUD completo + exemplos de erro (brand_id inválido, nome duplicado) |
+| Marcas | CRUD completo + exemplo de conflito ao deletar com modelos vinculados |
+| Usuários | CRUD completo |
 
 ---
 
