@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Model } from './models.entity';
+import { Brand } from '../brands/brands.entity';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
 import { ListModelsDto } from './dto/list-models.dto';
@@ -15,6 +16,7 @@ export class ModelsService {
   ) {}
 
   async create(data: CreateModelDto, userId: number) {
+    if (data.brand_id) await this.assertBrandExists(data.brand_id);
     const model = this.modelRepository.create({ ...data, created_by: userId });
     return this.modelRepository.save(model);
   }
@@ -35,6 +37,7 @@ export class ModelsService {
   }
 
   async update(id: number, changes: UpdateModelDto, _userId: number) {
+    if (changes.brand_id) await this.assertBrandExists(changes.brand_id);
     const model = await this.findOne(id);
     Object.assign(model, changes);
     return this.modelRepository.save(model);
@@ -54,5 +57,12 @@ export class ModelsService {
 
     await this.modelRepository.softRemove(model);
     return { message: 'Modelo removido com sucesso' };
+  }
+
+  private async assertBrandExists(brandId: number): Promise<void> {
+    const brand = await this.modelRepository.manager
+      .getRepository(Brand)
+      .findOne({ where: { id: brandId } });
+    if (!brand) throw new NotFoundException(`Marca com id ${brandId} não encontrada`);
   }
 }

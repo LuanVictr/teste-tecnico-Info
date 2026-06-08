@@ -27,6 +27,7 @@ export class ModelsController {
   @ApiOperation({ summary: 'Criar modelo', description: 'Cria um novo modelo de veículo.' })
   @ApiResponse({ status: 201, description: 'Modelo criado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  @ApiResponse({ status: 404, description: 'Marca não encontrada' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   create(@Body() body: CreateModelDto, @CurrentUser() currentUser: AuthUser) {
     return this.modelsService.create(body, currentUser.userId);
@@ -52,7 +53,7 @@ export class ModelsController {
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar modelo' })
   @ApiResponse({ status: 200, description: 'Modelo atualizado com sucesso' })
-  @ApiResponse({ status: 404, description: 'Modelo não encontrado' })
+  @ApiResponse({ status: 404, description: 'Modelo ou marca não encontrado' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   update(
     @Param('id', ParseIntPipe) id: number,
