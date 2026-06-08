@@ -7,14 +7,14 @@ const EXCHANGE = 'fleet.events';
 @Injectable()
 export class EventPublisherService implements OnModuleInit, OnModuleDestroy {
   channel: amqp.Channel | null = null;
-  private connection: amqp.Connection | null = null;
+  private model: amqp.ChannelModel | null = null;
 
   constructor(private readonly config: ConfigService) {}
 
   async onModuleInit(): Promise<void> {
     try {
-      this.connection = await amqp.connect(this.config.getOrThrow<string>('RABBITMQ_URL'));
-      this.channel = await this.connection.createChannel();
+      this.model = await amqp.connect(this.config.getOrThrow<string>('RABBITMQ_URL'));
+      this.channel = await this.model.createChannel();
       await this.channel.assertExchange(EXCHANGE, 'topic', { durable: true });
     } catch {
       // RabbitMQ unavailable — messaging is non-blocking
@@ -24,7 +24,7 @@ export class EventPublisherService implements OnModuleInit, OnModuleDestroy {
   async onModuleDestroy(): Promise<void> {
     try {
       await this.channel?.close();
-      await this.connection?.close();
+      await this.model?.close();
     } catch {}
   }
 

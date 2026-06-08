@@ -27,7 +27,7 @@ export class AuditConsumer implements OnModuleInit {
           const data = JSON.parse(msg.content.toString()) as {
             entity: string;
             action: string;
-            payload: unknown;
+            payload: Record<string, unknown>;
             userId: number;
             timestamp: string;
           };

@@ -6,7 +6,7 @@ import { AuditLog } from './audit-log.schema';
 interface CreateAuditLogDto {
   entity: string;
   action: string;
-  payload: unknown;
+  payload: Record<string, unknown>;
   userId: number;
   timestamp?: Date;
 }
