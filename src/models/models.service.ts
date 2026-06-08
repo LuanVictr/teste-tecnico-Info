@@ -17,6 +17,7 @@ export class ModelsService {
 
   async create(data: CreateModelDto, userId: number) {
     if (data.brand_id) await this.assertBrandExists(data.brand_id);
+    await this.assertNameAvailable(data.name, data.brand_id);
     const model = this.modelRepository.create({ ...data, created_by: userId });
     return this.modelRepository.save(model);
   }
@@ -39,6 +40,11 @@ export class ModelsService {
   async update(id: number, changes: UpdateModelDto, _userId: number) {
     if (changes.brand_id) await this.assertBrandExists(changes.brand_id);
     const model = await this.findOne(id);
+    if (changes.name !== undefined || changes.brand_id !== undefined) {
+      const name = changes.name ?? model.name;
+      const brandId = changes.brand_id !== undefined ? changes.brand_id : model.brand_id;
+      await this.assertNameAvailable(name, brandId, id);
+    }
     Object.assign(model, changes);
     return this.modelRepository.save(model);
   }
@@ -57,6 +63,19 @@ export class ModelsService {
 
     await this.modelRepository.softRemove(model);
     return { message: 'Modelo removido com sucesso' };
+  }
+
+  private async assertNameAvailable(name: string, brandId: number | null | undefined, excludeId?: number): Promise<void> {
+    const existing = await this.modelRepository.findOne({
+      where: { name, brand_id: brandId ?? null },
+    });
+    if (existing && existing.id !== excludeId) {
+      throw new ConflictException(
+        brandId
+          ? `Modelo '${name}' já existe para esta marca`
+          : `Modelo '${name}' já existe sem marca associada`,
+      );
+    }
   }
 
   private async assertBrandExists(brandId: number): Promise<void> {
