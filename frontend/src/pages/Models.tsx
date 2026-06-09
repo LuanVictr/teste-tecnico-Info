@@ -41,8 +41,8 @@ export default function Models({ toast }: Props) {
     setLoading(true)
     try {
       const [mRes, bRes] = await Promise.all([
-        api.get('/models?page=1&limit=200'),
-        api.get('/brands?page=1&limit=200'),
+        api.get('/models?page=1&limit=100'),
+        api.get('/brands?page=1&limit=100'),
       ])
       setModels(mRes.data?.data ?? mRes.data ?? [])
       setBrands(bRes.data?.data ?? bRes.data ?? [])

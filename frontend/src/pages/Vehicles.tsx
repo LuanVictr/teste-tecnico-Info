@@ -69,7 +69,7 @@ export default function Vehicles({ toast }: Props) {
 
   const loadModels = async () => {
     try {
-      const { data } = await api.get('/models?page=1&limit=200')
+      const { data } = await api.get('/models?page=1&limit=100')
       setModels(data?.data ?? data ?? [])
     } catch { /* ignore */ }
   }

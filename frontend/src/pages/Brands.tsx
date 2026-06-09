@@ -36,7 +36,7 @@ export default function Brands({ toast }: Props) {
   const load = async () => {
     setLoading(true)
     try {
-      const { data } = await api.get('/brands?page=1&limit=200')
+      const { data } = await api.get('/brands?page=1&limit=100')
       setBrands(data?.data ?? data ?? [])
     } catch {
       toast('Erro ao carregar marcas.', 'er')
