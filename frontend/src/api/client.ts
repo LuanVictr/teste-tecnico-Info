@@ -13,7 +13,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (r) => r,
   (err) => {
-    if (err.response?.status === 401) {
+    const isLoginRoute = err.config?.url?.includes('/auth/login')
+    if (err.response?.status === 401 && !isLoginRoute) {
       localStorage.removeItem('jwt_token')
       window.location.href = '/'
     }
