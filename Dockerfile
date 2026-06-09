@@ -4,7 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install --prefer-offline || npm install
 
 COPY . .
 RUN npm run build && npm prune --omit=dev
