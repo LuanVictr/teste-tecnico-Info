@@ -418,8 +418,6 @@ O diagrama completo está em `docs/system-design.excalidraw` — importe em [exc
 
 ---
 
-## Deploy em VPS
-
 ```bash
 git clone <repo-url>
 cd teste-tecnico-Info
