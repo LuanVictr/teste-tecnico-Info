@@ -9,21 +9,19 @@ interface Props {
 export default function Login({ onLogin, toast }: Props) {
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
-  const [err, setErr] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showErrModal, setShowErrModal] = useState(false)
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    setErr('')
-    if (!email || !pass) { setErr('Preencha todos os campos.'); return }
+    if (!email || !pass) { setShowErrModal(true); return }
     setLoading(true)
     try {
       const { data } = await api.post('/auth/login', { email, password: pass })
       localStorage.setItem('jwt_token', data.access_token)
       onLogin()
     } catch {
-      setErr('Credenciais inválidas.')
-      toast('Credenciais inválidas.', 'er')
+      setShowErrModal(true)
     } finally {
       setLoading(false)
     }
@@ -46,6 +44,7 @@ export default function Login({ onLogin, toast }: Props) {
           ))}
         </div>
       </div>
+
       <div className="login-right">
         <div className="login-card">
           <h2>Entrar na plataforma</h2>
@@ -59,7 +58,6 @@ export default function Login({ onLogin, toast }: Props) {
               <label>Senha</label>
               <input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="aivacol@123" />
             </div>
-            {err && <p className="login-error">{err}</p>}
             <br />
             <button className="btn-primary" type="submit">{loading ? 'Autenticando…' : 'Entrar'}</button>
           </form>
@@ -68,6 +66,31 @@ export default function Login({ onLogin, toast }: Props) {
           </div>
         </div>
       </div>
+
+      {showErrModal && (
+        <div className="modal-ov" onClick={() => setShowErrModal(false)}>
+          <div className="modal-box" style={{ maxWidth: 360 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hd" style={{ borderColor: 'var(--erb)' }}>
+              <h3 style={{ color: 'var(--er)' }}>Credencial inválida</h3>
+              <button className="modal-close" onClick={() => setShowErrModal(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: 14, color: 'var(--t2)', lineHeight: 1.6 }}>
+                E-mail ou senha incorretos.<br />
+                Verifique as credenciais e tente novamente.
+              </p>
+              <div style={{ marginTop: 16, padding: '10px 14px', background: 'var(--bd2)', borderRadius: 8, fontSize: 13 }}>
+                <strong>Credenciais de acesso:</strong><br />
+                <span style={{ color: 'var(--t2)' }}>E-mail:</span> <code>aivacol@aivacol.com</code><br />
+                <span style={{ color: 'var(--t2)' }}>Senha:</span> <code>aivacol@123</code>
+              </div>
+            </div>
+            <div className="modal-ft">
+              <button className="btn-save" onClick={() => setShowErrModal(false)}>Tentar novamente</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
