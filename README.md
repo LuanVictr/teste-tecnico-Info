@@ -26,7 +26,6 @@ API REST para gerenciamento de frota de veículos, construída como teste técni
 - [Rodando os testes](#rodando-os-testes)
 - [Variáveis de ambiente](#variáveis-de-ambiente)
 - [Arquitetura](#arquitetura)
-- [Deploy em VPS](#deploy-em-vps)
 
 ---
 
